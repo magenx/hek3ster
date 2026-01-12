@@ -85,7 +85,7 @@ jobs:
           expected_binaries=(
             "hek3ster-linux-amd64"
             "hek3ster-linux-arm64"
-            "hek3ster-macos-arm64"
+            "hek3ster-darwin-arm64"
           )
           
           for binary in "${expected_binaries[@]}"; do
