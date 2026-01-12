@@ -3,8 +3,10 @@ name: Build Go App and Create Draft Release
 on:
   workflow_dispatch:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
+    paths-ignore:
+      - '.github/**'
 
 jobs:
   build:
@@ -20,6 +22,16 @@ jobs:
             runner: ubuntu-latest
             goos: linux
             goarch: amd64
+          - os: linux
+            arch: arm64
+            runner: ubuntu-24.04-arm
+            goos: linux
+            goarch: arm64
+          - os: darwin
+            arch: arm64
+            runner: macos-latest
+            goos: darwin
+            goarch: arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
