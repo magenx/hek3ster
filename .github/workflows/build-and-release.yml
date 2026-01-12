@@ -108,9 +108,11 @@ jobs:
         with:
           draft: true
           generate_release_notes: true
+          tag_name: github.ref_name
           files: |
             hek3ster-*
             checksums.txt
+          append_body: true
           body: |
             ## Installation
             
@@ -130,22 +132,14 @@ jobs:
             sudo mv hek3ster-linux-arm64 /usr/local/bin/hek3ster
             ```
             
-            ### macOS (Intel)
-            ```bash
-            wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/hek3ster-macos-amd64
-            chmod +x hek3ster-macos-amd64
-            sudo mv hek3ster-macos-amd64 /usr/local/bin/hek3ster
-            ```
-            
             ### macOS (Apple Silicon)
             ```bash
-            wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/hek3ster-macos-arm64
-            chmod +x hek3ster-macos-arm64
-            sudo mv hek3ster-macos-arm64 /usr/local/bin/hek3ster
+            wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/hek3ster-darwin-arm64
+            chmod +x hek3ster-darwin-arm64
+            sudo mv hek3ster-darwin-arm64 /usr/local/bin/hek3ster
             ```
             
             ## Verify checksums
-            
             Download `checksums.txt` and verify your binary:
             ```bash
             sha256sum -c checksums.txt --ignore-missing
