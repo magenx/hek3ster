@@ -2,8 +2,8 @@
 > [hek`ster]
 
 <p align="center">
-<img width="220" height="230" alt="k3s" src="https://github.com/user-attachments/assets/9f1e3457-efb0-403d-b477-b77d3de6d3b2" />
-<img width="224" height="224" alt="Hek3ster" src="https://github.com/user-attachments/assets/c5704184-771d-4ef6-a1d4-704faf725723" />
+<img width="220" height="230" alt="k3s" src="https://github.com/user-attachments/assets/5d6a171f-e711-4660-8fa5-89022dd30664" />
+<img width="224" height="224" alt="Hek3ster" src="https://github.com/user-attachments/assets/ff48c9c3-0655-4ede-94d7-2f23a58f972f" />
 </p>
 
 > [Designed by Freepik]
@@ -12,7 +12,7 @@
 ### An independent open source project, not affiliated with Hetzner Online GmbH.
 The Hek3ster project is a Kubernetes cluster management tool written in Go, providing automated cluster creation, management, and operations on Hetzner Cloud infrastructure.
 
-**📚 [Website](https://magenx.github.io/hek3ster/)** | **📖 [GitHub Pages Setup Guide](GITHUB_PAGES.md)**
+**📚 [Website](https://magenx.github.io/hek3ster/)**
 
 ---
 
@@ -529,7 +529,7 @@ This project includes a marketing website built with React, Vite, TypeScript, an
 
 **Live Site:** [https://magenx.github.io/hek3ster/](https://magenx.github.io/hek3ster/)
 
-The website source code is in the `page/` folder and is automatically deployed to GitHub Pages when changes are pushed to the main branch. For more information about the deployment setup, see [GITHUB_PAGES.md](GITHUB_PAGES.md).
+The website source code is in the `page/` folder and is automatically deployed to GitHub Pages when changes are pushed to the main branch.
 
 ---
 
