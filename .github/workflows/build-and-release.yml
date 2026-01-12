@@ -85,7 +85,6 @@ jobs:
           expected_binaries=(
             "hek3ster-linux-amd64"
             "hek3ster-linux-arm64"
-            "hek3ster-macos-amd64"
             "hek3ster-macos-arm64"
           )
           
