@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php
+  labels:
+    app: php
+spec:
+  selector:
+    matchLabels:
+      app: php
+  template:
+    metadata:
+      labels:
+        app: php
+    spec:
+      containers:
+      - name: php
+        image: wordpress:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: magento
+          mountPath: /var/www/html
+      volumes:
+      - name: magento
+        persistentVolumeClaim:
+          claimName: disk
