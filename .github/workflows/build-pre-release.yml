@@ -11,6 +11,9 @@ concurrency:
   group: build
   cancel-in-progress: false
 
+permissions:
+  contents: write
+
 jobs:
   build-pre-release:
     if: "${{ github.event.release.prerelease == true }}"
