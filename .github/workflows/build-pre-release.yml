@@ -64,7 +64,7 @@ jobs:
           # Dynamically set the binary name based on OS and architecture
           BINARY_NAME="hek3ster-${{ matrix.os }}-${{ matrix.arch }}"
           
-          echo "Building $BINARY_NAME with version ${VERSION}"
+          echo "Building ${BINARY_NAME} with version ${VERSION}"
           
           # Build the Go binary with version information embedded via -ldflags
           CGO_ENABLED=0 go build -ldflags "-X github.com/magenx/hek3ster/pkg/version.Version=${VERSION} -s -w" -o "${BINARY_NAME}" ./cmd/hek3ster
@@ -79,13 +79,53 @@ jobs:
           chmod +x "${BINARY_NAME}"
           
           # Create checksums
-          sha256sum ${BINARY_NAME} > ${BINARY_NAME}_sha256sum.txt
+          sha256sum ${BINARY_NAME} >> checksums.txt
           
           # Upload Release Artifact
-          gh release upload ${{ github.event.release.tag_name }} "${BINARY_NAME}#${BINARY_NAME}"
-          gh release upload ${{ github.event.release.tag_name }} "${BINARY_NAME}_sha256sum.txt#${BINARY_NAME}_sha256sum"
-          
-      - name: Upload binary artifact
+          #echo "Uploading $BINARY_NAME with version ${VERSION}"
+          #gh release upload ${{ github.event.release.tag_name }} "${BINARY_NAME}#${BINARY_NAME}"
+          #gh release upload ${{ github.event.release.tag_name }} "${BINARY_NAME}_sha256sum.txt#${BINARY_NAME}_sha256sum"
+
+      - name: Attach Release Artifact
+        id: attach-release-artifact
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: |
+            hek3ster-*
+            checksums.txt
+          append_body: true
+          body: |
+            ## Installation Instructions
+
+            ### Linux (amd64)
+            ```bash
+            curl -fsSLO https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/hek3ster-linux-amd64
+            chmod +x hek3ster-linux-amd64
+            sudo mv hek3ster-linux-amd64 /usr/local/bin/hek3ster
+            ```
+            
+            ### Linux (arm64)
+            ```bash
+            curl -fsSLO https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/hek3ster-linux-arm64
+            chmod +x hek3ster-linux-arm64
+            sudo mv hek3ster-linux-arm64 /usr/local/bin/hek3ster
+            ```
+            
+            ### macOS (arm64)
+            ```bash
+            curl -fsSLO https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/hek3ster-darwin-arm64
+            chmod +x hek3ster-darwin-arm64
+            sudo mv hek3ster-darwin-arm64 /usr/local/bin/hek3ster
+            ```
+            
+            ## Verify checksums
+            Download `checksums.txt` and verify your binary:
+            ```bash
+            sha256sum -c checksums.txt --ignore-missing
+            ```
+
+      - name: Upload artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: hek3ster-${{ matrix.os }}-${{ matrix.arch }}
