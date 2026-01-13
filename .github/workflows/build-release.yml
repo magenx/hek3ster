@@ -52,6 +52,7 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: 0
+          GH_TOKEN: ${{ github.token }}
         run: |
           # Fetch the version from the GitHub release tag
           VERSION="${{ github.event.release.tag_name }}"
