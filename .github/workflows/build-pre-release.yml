@@ -50,10 +50,9 @@ jobs:
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: 0
         run: |
-          make test
-          go test -v -race -coverprofile=coverage.out ./...
+          # Run all test
+          CGO_ENABLED=1 go test -v -race -coverprofile=coverage.out ./...
           
           # Fetch the version from the GitHub release tag
           VERSION="${{ github.event.release.tag_name }}"
@@ -64,7 +63,7 @@ jobs:
           echo "Building $BINARY_NAME with version ${VERSION}"
           
           # Build the Go binary with version information embedded via -ldflags
-          go build -ldflags "-X github.com/magenx/hek3ster/pkg/version.Version=${VERSION} -s -w" -o "${BINARY_NAME}" ./cmd/hek3ster
+          CGO_ENABLED=0 go build -ldflags "-X github.com/magenx/hek3ster/pkg/version.Version=${VERSION} -s -w" -o "${BINARY_NAME}" ./cmd/hek3ster
           
           # Ensure the binary is executable
           chmod +x "${BINARY_NAME}"
