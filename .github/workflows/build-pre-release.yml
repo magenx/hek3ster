@@ -50,6 +50,7 @@ jobs:
           cache: true
 
       - name: Build binary
+        id: build
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
@@ -62,12 +63,13 @@ jobs:
           VERSION="${{ github.event.release.tag_name }}"
           
           # Dynamically set the binary name based on OS and architecture
-          BINARY_NAME="hek3ster-${{ matrix.os }}-${{ matrix.arch }}"
+          BINARY_NAME="${GITHUB_REPOSITORY##*/}-${{ matrix.os }}-${{ matrix.arch }}"
+          echo "binary_name=${GITHUB_REPOSITORY##*/}-${{ matrix.os }}-${{ matrix.arch }}" >> $GITHUB_OUTPUT
           
           echo "Building ${BINARY_NAME} with version ${VERSION}"
           
           # Build the Go binary with version information embedded via -ldflags
-          CGO_ENABLED=0 go build -ldflags "-X github.com/magenx/hek3ster/pkg/version.Version=${VERSION} -s -w" -o "${BINARY_NAME}" ./cmd/hek3ster
+          CGO_ENABLED=0 go build -ldflags "-X github.com/magenx/${GITHUB_REPOSITORY##*/}/pkg/version.Version=${VERSION} -s -w" -o "${BINARY_NAME}" ./cmd/${GITHUB_REPOSITORY##*/}
           
           # Check if the binary was successfully built
           if [ ! -f "${BINARY_NAME}" ]; then
@@ -75,16 +77,8 @@ jobs:
             exit 1
           fi
           
-          # Ensure the binary is executable
-          chmod +x "${BINARY_NAME}"
-          
-          # Create checksums
-          sha256sum ${BINARY_NAME} >> checksums.txt
-          
-          # Upload Release Artifact
-          #echo "Uploading $BINARY_NAME with version ${VERSION}"
-          #gh release upload ${{ github.event.release.tag_name }} "${BINARY_NAME}#${BINARY_NAME}"
-          #gh release upload ${{ github.event.release.tag_name }} "${BINARY_NAME}_sha256sum.txt#${BINARY_NAME}_sha256sum"
+          # Create checksum
+          echo "checksum=$(sha256sum ${BINARY_NAME})" >> $GITHUB_OUTPUT
 
       - name: Attach Release Artifact
         id: attach-release-artifact
@@ -93,44 +87,19 @@ jobs:
           token: ${{ secrets.HEK3STER_TOKEN }}
           tag_name: ${{ github.event.release.tag_name }}
           files: |
-            hek3ster-*
-            checksums.txt
+            ${{ steps.build.outputs.binary_name }}
           append_body: true
           body: |
-            ## Installation Instructions
-
-            ### Linux (amd64)
+            ### ${{ matrix.os }} (${{ matrix.arch }})
             ```bash
-            curl -fsSLO https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/hek3ster-linux-amd64
-            chmod +x hek3ster-linux-amd64
-            sudo mv hek3ster-linux-amd64 /usr/local/bin/hek3ster
-            ```
-            
-            ### Linux (arm64)
-            ```bash
-            curl -fsSLO https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/hek3ster-linux-arm64
-            chmod +x hek3ster-linux-arm64
-            sudo mv hek3ster-linux-arm64 /usr/local/bin/hek3ster
-            ```
-            
-            ### macOS (arm64)
-            ```bash
-            curl -fsSLO https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/hek3ster-darwin-arm64
-            chmod +x hek3ster-darwin-arm64
-            sudo mv hek3ster-darwin-arm64 /usr/local/bin/hek3ster
-            ```
-            
-            ## Verify checksums
-            Download `checksums.txt` and verify your binary:
-            ```bash
-            sha256sum -c checksums.txt --ignore-missing
+            curl -fsSLO https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/${{ steps.build.outputs.binary_name }}
+            if echo "${{ steps.build.outputs.checksum }}  ${{ steps.build.outputs.binary_name }}" | sha256sum -c; then
+              echo "✅ Verification passed"
+              chmod +x ${{ steps.build.outputs.binary_name }}
+              mv ${{ steps.build.outputs.binary_name }} /usr/local/bin/${GITHUB_REPOSITORY##*/}
+              ${GITHUB_REPOSITORY##*/} version
+            else
+              echo "❌ Verification failed"
+            fi
             ```
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        with:
-          name: hek3ster-${{ matrix.os }}-${{ matrix.arch }}
-          path: |
-            hek3ster-${{ matrix.os }}-${{ matrix.arch }}
-            ${BINARY_NAME}_sha256sum.txt
-          retention-days: 7
