@@ -1,15 +1,19 @@
 name: Build Go App and Create Draft Release
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - '.github/**'
+  release:
+    types: [published]
+
+env:
+  PRELELEASE_TYPE: ${{ vars.PRERELEASE_TYPE }}
+
+concurrency:
+  group: build
+  cancel-in-progress: true
 
 jobs:
-  build:
+  build-pre-release:
+    if: "${{ github.event.release.prerelease == true }}"
     name: Build Go Binary - ${{ matrix.os }}-${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
     permissions:
@@ -48,23 +52,43 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: 0
         run: |
-          VERSION="${GITHUB_REF#refs/tags/}"
-          if [ "$VERSION" = "$GITHUB_REF" ]; then
-            VERSION="dev-${GITHUB_SHA::7}"
-          fi
+          make test
+          go test -v -race -coverprofile=coverage.out ./...
+          
+          # Fetch the version from the GitHub release tag
+          VERSION="${{ github.event.release.tag_name }}"
+          
+          # Dynamically set the binary name based on OS and architecture
           BINARY_NAME="hek3ster-${{ matrix.os }}-${{ matrix.arch }}"
-          echo "Building $BINARY_NAME with version $VERSION"
-          go build -ldflags "-X github.com/magenx/hek3ster/pkg/version.Version=$VERSION -s -w" -o "$BINARY_NAME" ./cmd/hek3ster
-          chmod +x "$BINARY_NAME"
-          ls -lh "$BINARY_NAME"
-
+          
+          echo "Building $BINARY_NAME with version ${VERSION}"
+          
+          # Build the Go binary with version information embedded via -ldflags
+          go build -ldflags "-X github.com/magenx/hek3ster/pkg/version.Version=${VERSION} -s -w" -o "${BINARY_NAME}" ./cmd/hek3ster
+          
+          # Ensure the binary is executable
+          chmod +x "${BINARY_NAME}"
+          
+          # List details of the built binary
+          ls -lh "${BINARY_NAME}"
+          
+          # Create checksums
+          sha256sum ${BINARY_NAME} > ${BINARY_NAME}_sha256sum.txt
+          
+          # Upload Release Artifact
+          gh release upload ${{ github.event.release.tag_name }} ${BINARY_NAME} #${BINARY_NAME}
+          gh release upload ${{ github.event.release.tag_name }} ${BINARY_NAME}_sha256sum.txt #${BINARY_NAME}_sha256sum
+          
       - name: Upload binary artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: hek3ster-${{ matrix.os }}-${{ matrix.arch }}
-          path: hek3ster-${{ matrix.os }}-${{ matrix.arch }}
+          path: |
+            hek3ster-${{ matrix.os }}-${{ matrix.arch }}
+            ${BINARY_NAME}_sha256sum.txt
           retention-days: 7
 
+<<<<<<< Updated upstream
   create-draft-release:
     name: Create Draft Release
     runs-on: ubuntu-latest
@@ -144,4 +168,6 @@ jobs:
             ```bash
             sha256sum -c checksums.txt --ignore-missing
             ```
+=======
+>>>>>>> Stashed changes
           
