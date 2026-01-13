@@ -144,10 +144,10 @@ func (n *NetworkResourceManager) CreateAPILoadBalancer(masterServers []*hcloud.S
 	// This is more reliable than adding individual server targets
 	util.LogInfo("Adding master servers as targets to API load balancer", "load balancer")
 	labelSelector := fmt.Sprintf("role=master,cluster=%s", n.Config.ClusterName)
-	
+
 	// Use private IP if network is attached, otherwise use public IP
 	usePrivateIP := shouldAttachToNetwork
-	
+
 	err = n.HetznerClient.AddLabelSelectorTargetToLoadBalancer(n.ctx, lb, hcloud.LoadBalancerAddLabelSelectorTargetOpts{
 		Selector:     labelSelector,
 		UsePrivateIP: hcloud.Ptr(usePrivateIP),

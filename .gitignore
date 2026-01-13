@@ -1,0 +1,12 @@
+# Build artifacts
+dist/
+coverage.out
+
+# Binary
+hek3ster
+
+# Test binaries
+*.test
+
+# Go workspace file
+go.work

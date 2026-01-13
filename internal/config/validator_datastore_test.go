@@ -10,10 +10,10 @@ import (
 func getValidTestConfig(t *testing.T) *Main {
 	// Create temporary SSH keys for testing using t.TempDir() for automatic cleanup
 	tmpDir := t.TempDir()
-	
+
 	privateKeyPath := filepath.Join(tmpDir, "id_rsa")
 	publicKeyPath := filepath.Join(tmpDir, "id_rsa.pub")
-	
+
 	// Create dummy SSH key files
 	if err := os.WriteFile(privateKeyPath, []byte("dummy private key"), 0600); err != nil {
 		t.Fatalf("Failed to create test private key: %v", err)
@@ -21,7 +21,7 @@ func getValidTestConfig(t *testing.T) *Main {
 	if err := os.WriteFile(publicKeyPath, []byte("dummy public key"), 0644); err != nil {
 		t.Fatalf("Failed to create test public key: %v", err)
 	}
-	
+
 	return &Main{
 		ClusterName: "test-cluster",
 		K3sVersion:  "v1.32.0+k3s1",
