@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1-alpha.1](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha...v1.0.1-alpha.1) (2026-01-13)
+
+
+### 🚦 Maintenance
+
+* Update buttons to include links for actions ([#14](https://github.com/magenx/hek3ster/issues/14)) ([9c47468](https://github.com/magenx/hek3ster/commit/9c47468ce084debe0a86ad2b42a2ea25bec373d0))
+* Use CGO conditional variable flag ([b412569](https://github.com/magenx/hek3ster/commit/b41256954ee5fa05dbb6d930abb8a072c7a730ec))
+
 ## [1.0.1-alpha](https://github.com/magenx/hek3ster/compare/v1.0.0...v1.0.1-alpha) (2026-01-13)
 
 
