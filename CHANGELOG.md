@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.1-alpha.6](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.5...v1.0.1-alpha.6) (2026-01-13)
+
+
+### 🚦 Maintenance
+
+* Refactor build-release.yml for security and clarity ([#38](https://github.com/magenx/hek3ster/issues/38)) ([08f40b7](https://github.com/magenx/hek3ster/commit/08f40b7eeb740158e4b2c7557a8b679ec1a84d02))
+* Remove commented-out code in init function ([#39](https://github.com/magenx/hek3ster/issues/39)) ([39f8cfd](https://github.com/magenx/hek3ster/commit/39f8cfdebc8b791c2d363fb1e04a4fc656e4b861))
+* Update GH_TOKEN to use secrets in build workflow ([#37](https://github.com/magenx/hek3ster/issues/37)) ([faebc98](https://github.com/magenx/hek3ster/commit/faebc98d379ed542581dbd9254a2b487dca7bd6c))
+
 ## [1.0.1-alpha.5](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.4...v1.0.1-alpha.5) (2026-01-13)
 
 
