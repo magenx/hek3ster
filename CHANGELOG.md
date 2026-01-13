@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1-alpha.3](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.2...v1.0.1-alpha.3) (2026-01-13)
+
+
+### 🚦 Maintenance
+
+* Change cancel-in-progress to false in workflow ([#24](https://github.com/magenx/hek3ster/issues/24)) ([fb7dc90](https://github.com/magenx/hek3ster/commit/fb7dc90fd762403aa346af410c49e79161e42ae1))
+* Fix build-all target in Makefile ([#25](https://github.com/magenx/hek3ster/issues/25)) ([d6a7ce4](https://github.com/magenx/hek3ster/commit/d6a7ce4802cc4fab5132499b179d503b452a0592))
+
 ## [1.0.1-alpha.2](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.1...v1.0.1-alpha.2) (2026-01-13)
 
 
