@@ -50,5 +50,4 @@ Examples:
 
 func init() {
 	// This command will be added to the root command in root.go
-	//
 }
