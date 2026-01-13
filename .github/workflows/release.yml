@@ -9,6 +9,7 @@ on:
       - 'application/**'
       - 'page/**'
       - 'README.md'
+      - 'CODE_OF_CONDUCT.md'
 
 permissions:
   contents: write
