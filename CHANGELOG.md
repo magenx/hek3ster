@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1-alpha.10](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.9...v1.0.1-alpha.10) (2026-01-13)
+
+
+### 🚦 Maintenance
+
+* Remove commented-out code in init function ([#54](https://github.com/magenx/hek3ster/issues/54)) ([5a5c9c7](https://github.com/magenx/hek3ster/commit/5a5c9c76fbf45726b12910f429aca803446e750a))
+
 ## [1.0.1-alpha.9](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.8...v1.0.1-alpha.9) (2026-01-13)
 
 
