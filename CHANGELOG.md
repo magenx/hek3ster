@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1-alpha.4](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.3...v1.0.1-alpha.4) (2026-01-13)
+
+
+### 🚦 Maintenance
+
+* Remove quotes from echo statements in Makefile ([#28](https://github.com/magenx/hek3ster/issues/28)) ([972b0d2](https://github.com/magenx/hek3ster/commit/972b0d2affe39cc5d22ef280dc64a5c478dda6dd))
+
 ## [1.0.1-alpha.3](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.2...v1.0.1-alpha.3) (2026-01-13)
 
 
