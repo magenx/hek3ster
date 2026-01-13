@@ -52,7 +52,7 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: 0
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Fetch the version from the GitHub release tag
           VERSION="${{ github.event.release.tag_name }}"
@@ -65,18 +65,21 @@ jobs:
           # Build the Go binary with version information embedded via -ldflags
           go build -ldflags "-X github.com/magenx/hek3ster/pkg/version.Version=${VERSION} -s -w" -o "${BINARY_NAME}" ./cmd/hek3ster
           
+          # Check if the binary was successfully built
+          if [ ! -f "${BINARY_NAME}" ]; then
+            echo "Error: Build failed. Binary not found!"
+            exit 1
+          fi
+          
           # Ensure the binary is executable
           chmod +x "${BINARY_NAME}"
-          
-          # List details of the built binary
-          ls -lh "${BINARY_NAME}"
           
           # Create checksums
           sha256sum ${BINARY_NAME} > ${BINARY_NAME}_sha256sum.txt
           
           # Upload Release Artifact
-          gh release upload ${{ github.event.release.tag_name }} ${BINARY_NAME} #${BINARY_NAME}
-          gh release upload ${{ github.event.release.tag_name }} ${BINARY_NAME}_sha256sum.txt #${BINARY_NAME}_sha256sum
+          gh release upload ${{ github.event.release.tag_name }} "${BINARY_NAME}#${BINARY_NAME}"
+          gh release upload ${{ github.event.release.tag_name }} "${BINARY_NAME}_sha256sum.txt#${BINARY_NAME}_sha256sum"
           
       - name: Upload binary artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
