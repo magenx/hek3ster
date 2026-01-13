@@ -63,22 +63,23 @@ jobs:
           VERSION="${{ github.event.release.tag_name }}"
           
           # Dynamically set the binary name based on OS and architecture
-          BINARY_NAME="${GITHUB_REPOSITORY##*/}-${{ matrix.os }}-${{ matrix.arch }}"
-          echo "binary_name=${GITHUB_REPOSITORY##*/}-${{ matrix.os }}-${{ matrix.arch }}" >> $GITHUB_OUTPUT
+          BINARY_NAME_ARCH="${GITHUB_REPOSITORY##*/}-${{ matrix.os }}-${{ matrix.arch }}"
+          echo "binary_name_arch=${GITHUB_REPOSITORY##*/}-${{ matrix.os }}-${{ matrix.arch }}" >> $GITHUB_OUTPUT
+          echo "BINARY_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
           
-          echo "Building ${BINARY_NAME} with version ${VERSION}"
+          echo "Building ${BINARY_NAME_ARCH} with version ${VERSION}"
           
           # Build the Go binary with version information embedded via -ldflags
-          CGO_ENABLED=0 go build -ldflags "-X github.com/magenx/${GITHUB_REPOSITORY##*/}/pkg/version.Version=${VERSION} -s -w" -o "${BINARY_NAME}" ./cmd/${GITHUB_REPOSITORY##*/}
+          CGO_ENABLED=0 go build -ldflags "-X github.com/magenx/${GITHUB_REPOSITORY##*/}/pkg/version.Version=${VERSION} -s -w" -o "${BINARY_NAME_ARCH}" ./cmd/${GITHUB_REPOSITORY##*/}
           
           # Check if the binary was successfully built
-          if [ ! -f "${BINARY_NAME}" ]; then
+          if [ ! -f "${BINARY_NAME_ARCH}" ]; then
             echo "Error: Build failed. Binary not found!"
             exit 1
           fi
           
           # Create checksum
-          echo "checksum=$(sha256sum ${BINARY_NAME})" >> $GITHUB_OUTPUT
+          echo "checksum=$(sha256sum ${BINARY_NAME_ARCH})" >> $GITHUB_OUTPUT
 
       - name: Attach Release Artifact
         id: attach-release-artifact
@@ -87,17 +88,17 @@ jobs:
           token: ${{ secrets.HEK3STER_TOKEN }}
           tag_name: ${{ github.event.release.tag_name }}
           files: |
-            ${{ steps.build.outputs.binary_name }}
+            ${{ steps.build.outputs.binary_name_arch }}
           append_body: true
           body: |
             ### ${{ matrix.os }} (${{ matrix.arch }})
             ```bash
-            curl -fsSLO https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/${{ steps.build.outputs.binary_name }}
-            if echo "${{ steps.build.outputs.checksum }}  ${{ steps.build.outputs.binary_name }}" | sha256sum -c; then
+            curl -fsSLO https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/${{ steps.build.outputs.binary_name_arch }}
+            if echo "${{ steps.build.outputs.checksum }}" | sha256sum -c; then
               echo "✅ Verification passed"
-              chmod +x ${{ steps.build.outputs.binary_name }}
-              mv ${{ steps.build.outputs.binary_name }} /usr/local/bin/${GITHUB_REPOSITORY##*/}
-              ${GITHUB_REPOSITORY##*/} version
+              chmod +x ${{ steps.build.outputs.binary_name_arch }}
+              mv ${{ steps.build.outputs.binary_name_arch }} /usr/local/bin/${{ env.BINARY_NAME }}
+              ${{ env.BINARY_NAME }} version
             else
               echo "❌ Verification failed"
             fi
