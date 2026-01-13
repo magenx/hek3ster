@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1-alpha.8](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.7...v1.0.1-alpha.8) (2026-01-13)
+
+
+### 🚦 Maintenance
+
+* Remove unnecessary comment in init function ([#47](https://github.com/magenx/hek3ster/issues/47)) ([a8dcf8b](https://github.com/magenx/hek3ster/commit/a8dcf8b3c58ac4042cfe782d739466dbedb91507))
+* Replace GITHUB_TOKEN with HEK3STER_TOKEN in workflow ([#46](https://github.com/magenx/hek3ster/issues/46)) ([9d10175](https://github.com/magenx/hek3ster/commit/9d10175b9f71d390ad8bbc721dad51dc0b6d7e30))
+
 ## [1.0.1-alpha.7](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.6...v1.0.1-alpha.7) (2026-01-13)
 
 
