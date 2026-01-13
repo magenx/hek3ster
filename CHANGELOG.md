@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1-alpha.9](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.8...v1.0.1-alpha.9) (2026-01-13)
+
+
+### 🚦 Maintenance
+
+* Add comment placeholder in init function ([#51](https://github.com/magenx/hek3ster/issues/51)) ([604c36a](https://github.com/magenx/hek3ster/commit/604c36a921e549839294cd50714734f847380667))
+* Refactor build-pre-release workflow for binary naming ([#50](https://github.com/magenx/hek3ster/issues/50)) ([53140c4](https://github.com/magenx/hek3ster/commit/53140c4d996cffc277f1b44cc59819e8564c9b9a))
+
 ## [1.0.1-alpha.8](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.7...v1.0.1-alpha.8) (2026-01-13)
 
 
