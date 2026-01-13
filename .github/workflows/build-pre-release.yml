@@ -1,4 +1,4 @@
-name: Build Go App and Create Draft Release
+name: Build Go App for Pre-Release
 
 on:
   release:
@@ -87,4 +87,3 @@ jobs:
             hek3ster-${{ matrix.os }}-${{ matrix.arch }}
             ${BINARY_NAME}_sha256sum.txt
           retention-days: 7
-          
