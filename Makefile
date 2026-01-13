@@ -35,7 +35,7 @@ build-darwin-arm:
 	@echo "Building $(BINARY_NAME) for macOS arm64..."
 	GOOS=darwin GOARCH=arm64 $(GOBUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-darwin-arm64 ./cmd/hek3ster
 
-build-all: build-linux build-linux-arm build-darwin build-darwin-arm
+build-all: build-linux build-linux-arm build-darwin-arm
 
 test:
 	@echo "Running tests..."
