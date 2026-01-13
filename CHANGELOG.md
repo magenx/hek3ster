@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.1-alpha.5](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.4...v1.0.1-alpha.5) (2026-01-13)
+
+
+### 🚦 Maintenance
+
+* Add comment placeholder in init function ([#34](https://github.com/magenx/hek3ster/issues/34)) ([98803ca](https://github.com/magenx/hek3ster/commit/98803ca0113650164441b39c31308834e9a4ac10))
+* Add permissions for contents in build workflow ([#32](https://github.com/magenx/hek3ster/issues/32)) ([c25f1c2](https://github.com/magenx/hek3ster/commit/c25f1c273b635d99e496c2d5f07f45abfd1148a7))
+* Enhance build script with binary checks and uploads ([#31](https://github.com/magenx/hek3ster/issues/31)) ([c014b2b](https://github.com/magenx/hek3ster/commit/c014b2ba84ed3971abf55299e18144a37d816249))
+* Update Makefile ([#33](https://github.com/magenx/hek3ster/issues/33)) ([44093c1](https://github.com/magenx/hek3ster/commit/44093c1e64181c67401d8da7fff5a0b9cfbfcab2))
+
 ## [1.0.1-alpha.4](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.3...v1.0.1-alpha.4) (2026-01-13)
 
 
