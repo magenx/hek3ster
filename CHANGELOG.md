@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1-alpha.7](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.6...v1.0.1-alpha.7) (2026-01-13)
+
+
+### 🚦 Maintenance
+
+* Add comment placeholder in init function ([#43](https://github.com/magenx/hek3ster/issues/43)) ([a0e481a](https://github.com/magenx/hek3ster/commit/a0e481ac4a5febf30cb0a05ec2dcaab16edaf1ea))
+* Enhance build-pre-release.yml for artifact uploads ([#42](https://github.com/magenx/hek3ster/issues/42)) ([0062aa1](https://github.com/magenx/hek3ster/commit/0062aa132ef155bad5d8238f44b833464eeb6bff))
+
 ## [1.0.1-alpha.6](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.5...v1.0.1-alpha.6) (2026-01-13)
 
 
