@@ -1,7 +1,7 @@
 .PHONY: build clean test install lint
 
 BINARY_NAME=hek3ster
-VERSION=2.4.4
+VERSION=0.0.0
 BUILD_DIR=dist
 INSTALL_PATH=/usr/local/bin
 
