@@ -27,10 +27,6 @@ build-linux:
 	@echo "Building $(BINARY_NAME) for Linux amd64..."
 	GOOS=linux GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-linux-amd64 ./cmd/hek3ster
 
-build-darwin:
-	@echo "Building $(BINARY_NAME) for macOS amd64..."
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-darwin-amd64 ./cmd/hek3ster
-
 build-linux-arm:
 	@echo "Building $(BINARY_NAME) for Linux arm64..."
 	GOOS=linux GOARCH=arm64 $(GOBUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-linux-arm64 ./cmd/hek3ster
