@@ -117,7 +117,7 @@ func (c *CiliumInstaller) installWithCustomValues(masterSSHIP, valuesPath string
 
 	// Sanitize version to prevent command injection
 	version := sanitizeVersion(ciliumConfig.HelmChartVersion)
-	
+
 	// Upload values file to master node
 	remoteValuesPath := "/tmp/cilium_values.yaml"
 	uploadCmd := fmt.Sprintf("cat > %s <<'EOF'\n%s\nEOF", remoteValuesPath, string(valuesContent))
@@ -178,7 +178,7 @@ func (c *CiliumInstaller) installWithGeneratedValues(masterSSHIP string) error {
 
 	// Sanitize version to prevent command injection
 	version := sanitizeVersion(ciliumConfig.HelmChartVersion)
-	
+
 	// Install Cilium with generated values - remote path is safe since it's hardcoded
 	installCmd := fmt.Sprintf(
 		"helm upgrade --install --version %s --namespace kube-system --values %s cilium cilium/cilium",

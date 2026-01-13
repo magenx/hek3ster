@@ -107,7 +107,7 @@ func TestWriteToFile_OverwriteExisting(t *testing.T) {
 func TestWriteToFile_KubeconfigScenario(t *testing.T) {
 	// Simulate the exact scenario from the issue
 	tmpDir := t.TempDir()
-	
+
 	// Simulate writing to ~/.kube/config (which doesn't exist yet)
 	kubeconfigPath := filepath.Join(tmpDir, ".kube", "config")
 	kubeconfigContent := []byte(`apiVersion: v1

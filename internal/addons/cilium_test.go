@@ -20,10 +20,10 @@ func TestCiliumInstaller_Creation(t *testing.T) {
 			},
 		},
 	}
-	
+
 	// Ensure defaults are set
 	cfg.Networking.CNI.Cilium.SetDefaults()
-	
+
 	installer := NewCiliumInstaller(cfg, nil)
 
 	if installer == nil {

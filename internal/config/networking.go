@@ -53,23 +53,23 @@ func (c *CNI) SetDefaults() {
 
 // Cilium represents Cilium CNI configuration
 type Cilium struct {
-	Enabled               bool     `yaml:"enabled,omitempty"`
-	Version               string   `yaml:"version,omitempty"`
-	HelmChartVersion      string   `yaml:"helm_chart_version,omitempty"`
-	HelmValuesPath        string   `yaml:"helm_values_path,omitempty"`
-	EncryptionType        string   `yaml:"encryption_type,omitempty"`
-	RoutingMode           string   `yaml:"routing_mode,omitempty"`
-	TunnelProtocol        string   `yaml:"tunnel_protocol,omitempty"`
-	HubbleEnabled         *bool    `yaml:"hubble_enabled,omitempty"`
-	HubbleMetrics         string   `yaml:"hubble_metrics,omitempty"`
-	HubbleRelayEnabled    *bool    `yaml:"hubble_relay_enabled,omitempty"`
-	HubbleUIEnabled       *bool    `yaml:"hubble_ui_enabled,omitempty"`
-	K8sServiceHost        string   `yaml:"k8s_service_host,omitempty"`
-	K8sServicePort        int      `yaml:"k8s_service_port,omitempty"`
-	OperatorReplicas      int      `yaml:"operator_replicas,omitempty"`
-	OperatorMemoryRequest string   `yaml:"operator_memory_request,omitempty"`
-	AgentMemoryRequest    string   `yaml:"agent_memory_request,omitempty"`
-	EgressGatewayEnabled  bool     `yaml:"egress_gateway_enabled,omitempty"`
+	Enabled               bool   `yaml:"enabled,omitempty"`
+	Version               string `yaml:"version,omitempty"`
+	HelmChartVersion      string `yaml:"helm_chart_version,omitempty"`
+	HelmValuesPath        string `yaml:"helm_values_path,omitempty"`
+	EncryptionType        string `yaml:"encryption_type,omitempty"`
+	RoutingMode           string `yaml:"routing_mode,omitempty"`
+	TunnelProtocol        string `yaml:"tunnel_protocol,omitempty"`
+	HubbleEnabled         *bool  `yaml:"hubble_enabled,omitempty"`
+	HubbleMetrics         string `yaml:"hubble_metrics,omitempty"`
+	HubbleRelayEnabled    *bool  `yaml:"hubble_relay_enabled,omitempty"`
+	HubbleUIEnabled       *bool  `yaml:"hubble_ui_enabled,omitempty"`
+	K8sServiceHost        string `yaml:"k8s_service_host,omitempty"`
+	K8sServicePort        int    `yaml:"k8s_service_port,omitempty"`
+	OperatorReplicas      int    `yaml:"operator_replicas,omitempty"`
+	OperatorMemoryRequest string `yaml:"operator_memory_request,omitempty"`
+	AgentMemoryRequest    string `yaml:"agent_memory_request,omitempty"`
+	EgressGatewayEnabled  bool   `yaml:"egress_gateway_enabled,omitempty"`
 }
 
 // SetDefaults sets default values for Cilium

@@ -496,132 +496,132 @@ func TestSeparateWorkerPools(t *testing.T) {
 
 // TestParallelResourceCreation verifies that parallel resource creation works correctly
 func TestParallelResourceCreation(t *testing.T) {
-t.Run("parallel execution completes successfully", func(t *testing.T) {
-// Simulate parallel creation of multiple resources
-const numResources = 5
-results := make([]int, numResources)
+	t.Run("parallel execution completes successfully", func(t *testing.T) {
+		// Simulate parallel creation of multiple resources
+		const numResources = 5
+		results := make([]int, numResources)
 
-// Use the same pattern as in create_enhanced.go
-var wg sync.WaitGroup
-var mu sync.Mutex
-var errors []error
+		// Use the same pattern as in create_enhanced.go
+		var wg sync.WaitGroup
+		var mu sync.Mutex
+		var errors []error
 
-for i := 0; i < numResources; i++ {
-wg.Add(1)
-go func(index int) {
-defer wg.Done()
-// Simulate resource creation
-mu.Lock()
-results[index] = index + 1
-mu.Unlock()
-}(i)
-}
+		for i := 0; i < numResources; i++ {
+			wg.Add(1)
+			go func(index int) {
+				defer wg.Done()
+				// Simulate resource creation
+				mu.Lock()
+				results[index] = index + 1
+				mu.Unlock()
+			}(i)
+		}
 
-wg.Wait()
+		wg.Wait()
 
-// Verify all resources were created
-if len(errors) > 0 {
-t.Errorf("Expected no errors, got: %v", errors)
-}
+		// Verify all resources were created
+		if len(errors) > 0 {
+			t.Errorf("Expected no errors, got: %v", errors)
+		}
 
-for i := 0; i < numResources; i++ {
-if results[i] != i+1 {
-t.Errorf("Expected result[%d] to be %d, got %d", i, i+1, results[i])
-}
-}
-})
+		for i := 0; i < numResources; i++ {
+			if results[i] != i+1 {
+				t.Errorf("Expected result[%d] to be %d, got %d", i, i+1, results[i])
+			}
+		}
+	})
 
-t.Run("parallel execution handles errors correctly", func(t *testing.T) {
-// Simulate parallel creation with errors
-const numResources = 5
-const failAtIndex = 2
+	t.Run("parallel execution handles errors correctly", func(t *testing.T) {
+		// Simulate parallel creation with errors
+		const numResources = 5
+		const failAtIndex = 2
 
-var wg sync.WaitGroup
-var mu sync.Mutex
-var errors []error
+		var wg sync.WaitGroup
+		var mu sync.Mutex
+		var errors []error
 
-for i := 0; i < numResources; i++ {
-wg.Add(1)
-go func(index int) {
-defer wg.Done()
-if index == failAtIndex {
-mu.Lock()
-errors = append(errors, fmt.Errorf("simulated error at index %d", index))
-mu.Unlock()
-}
-}(i)
-}
+		for i := 0; i < numResources; i++ {
+			wg.Add(1)
+			go func(index int) {
+				defer wg.Done()
+				if index == failAtIndex {
+					mu.Lock()
+					errors = append(errors, fmt.Errorf("simulated error at index %d", index))
+					mu.Unlock()
+				}
+			}(i)
+		}
 
-wg.Wait()
+		wg.Wait()
 
-// Verify error was captured
-if len(errors) != 1 {
-t.Errorf("Expected 1 error, got %d", len(errors))
-}
+		// Verify error was captured
+		if len(errors) != 1 {
+			t.Errorf("Expected 1 error, got %d", len(errors))
+		}
 
-if len(errors) > 0 && !strings.Contains(errors[0].Error(), "simulated error") {
-t.Errorf("Expected error message to contain 'simulated error', got: %v", errors[0])
-}
-})
+		if len(errors) > 0 && !strings.Contains(errors[0].Error(), "simulated error") {
+			t.Errorf("Expected error message to contain 'simulated error', got: %v", errors[0])
+		}
+	})
 }
 
 // TestConcurrentMapAccess verifies that concurrent map access is safe
 func TestConcurrentMapAccess(t *testing.T) {
-// Test pattern used for masters creation with pre-allocated slice
-t.Run("pre-allocated slice concurrent access", func(t *testing.T) {
-const numItems = 10
-items := make([]*string, numItems)
+	// Test pattern used for masters creation with pre-allocated slice
+	t.Run("pre-allocated slice concurrent access", func(t *testing.T) {
+		const numItems = 10
+		items := make([]*string, numItems)
 
-var wg sync.WaitGroup
-var mu sync.Mutex
+		var wg sync.WaitGroup
+		var mu sync.Mutex
 
-for i := 0; i < numItems; i++ {
-wg.Add(1)
-go func(index int) {
-defer wg.Done()
-value := fmt.Sprintf("item-%d", index)
-mu.Lock()
-items[index] = &value
-mu.Unlock()
-}(i)
-}
+		for i := 0; i < numItems; i++ {
+			wg.Add(1)
+			go func(index int) {
+				defer wg.Done()
+				value := fmt.Sprintf("item-%d", index)
+				mu.Lock()
+				items[index] = &value
+				mu.Unlock()
+			}(i)
+		}
 
-wg.Wait()
+		wg.Wait()
 
-// Verify all items were set
-for i, item := range items {
-if item == nil {
-t.Errorf("Expected item at index %d to be set, got nil", i)
-} else if *item != fmt.Sprintf("item-%d", i) {
-t.Errorf("Expected item[%d] to be 'item-%d', got '%s'", i, i, *item)
-}
-}
-})
+		// Verify all items were set
+		for i, item := range items {
+			if item == nil {
+				t.Errorf("Expected item at index %d to be set, got nil", i)
+			} else if *item != fmt.Sprintf("item-%d", i) {
+				t.Errorf("Expected item[%d] to be 'item-%d', got '%s'", i, i, *item)
+			}
+		}
+	})
 
-// Test pattern used for workers creation with append
-t.Run("append slice concurrent access", func(t *testing.T) {
-const numItems = 10
-items := make([]*string, 0, numItems)
+	// Test pattern used for workers creation with append
+	t.Run("append slice concurrent access", func(t *testing.T) {
+		const numItems = 10
+		items := make([]*string, 0, numItems)
 
-var wg sync.WaitGroup
-var mu sync.Mutex
+		var wg sync.WaitGroup
+		var mu sync.Mutex
 
-for i := 0; i < numItems; i++ {
-wg.Add(1)
-go func(index int) {
-defer wg.Done()
-value := fmt.Sprintf("item-%d", index)
-mu.Lock()
-items = append(items, &value)
-mu.Unlock()
-}(i)
-}
+		for i := 0; i < numItems; i++ {
+			wg.Add(1)
+			go func(index int) {
+				defer wg.Done()
+				value := fmt.Sprintf("item-%d", index)
+				mu.Lock()
+				items = append(items, &value)
+				mu.Unlock()
+			}(i)
+		}
 
-wg.Wait()
+		wg.Wait()
 
-// Verify correct number of items (order doesn't matter for workers)
-if len(items) != numItems {
-t.Errorf("Expected %d items, got %d", numItems, len(items))
-}
-})
+		// Verify correct number of items (order doesn't matter for workers)
+		if len(items) != numItems {
+			t.Errorf("Expected %d items, got %d", numItems, len(items))
+		}
+	})
 }

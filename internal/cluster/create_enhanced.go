@@ -191,7 +191,7 @@ func (c *CreatorEnhanced) Run() error {
 	if len(masters) > 1 {
 		spinner := util.NewSpinner(fmt.Sprintf("Installing k3s on %d additional master(s)", len(masters)-1), "master")
 		spinner.Start()
-		
+
 		var wg sync.WaitGroup
 		var mu sync.Mutex
 		var errors []error
@@ -1331,7 +1331,7 @@ func (c *CreatorEnhanced) retrieveKubeconfig(server *hcloud.Server, apiLoadBalan
 	// Replace localhost with actual server IP in kubeconfig
 	// Determine which IP to use for external API access
 	var serverIP string
-	
+
 	// Priority 1: API load balancer IP (if configured and created)
 	if apiLoadBalancer != nil && apiLoadBalancer.PublicNet.IPv4.IP != nil {
 		serverIP = apiLoadBalancer.PublicNet.IPv4.IP.String()
