@@ -31,16 +31,16 @@ const pricingPlans = [{
     text: "€73/month control plane fee",
     included: false
   }, {
-    text: "~$1,440/month for 10 EC2 instances",
+    text: "~€1,440/month for 10 EC2 instances",
     included: false
   }, {
     text: "~€75/month for Load Balancer",
     included: false
   }, {
-    text: "Data transfer, EBS",
+    text: "Data transfer and EBS",
     included: false
   }, {
-    text: "Complex pricing model",
+    text: "Other services",
     included: false
   }],
   highlighted: false
@@ -99,7 +99,7 @@ export function Pricing() {
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Experience major cloud savings versus cloud providers
+            Experience major savings versus top cloud providers
           </h2>
           <p className="text-lg text-muted-foreground">
             hek3ster is free open-source software that deploys to Hetzner Cloud
