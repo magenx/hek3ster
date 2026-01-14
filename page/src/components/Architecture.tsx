@@ -1,4 +1,5 @@
-import { Server, Database, Shield, Globe, Network, Cpu, Box, Router } from "lucide-react";
+
+import { Server, Database, Shield, Globe, Network, Cpu, Box, Router, HardDrive, ShieldCheck } from "lucide-react";
 
 export function Architecture() {
   return (
@@ -53,11 +54,24 @@ export function Architecture() {
             </div>
 
             {/* Private Network Box */}
-            <div className="flex-1 border-2 border-dashed border-primary/50 rounded-2xl bg-card/50 p-4 relative">
-              <div className="absolute -top-3 left-4 bg-background px-2">
-                <span className="text-xs font-semibold text-primary flex items-center gap-1">
+            <div className="flex-1 border-2 border-dashed border-primary/50 rounded-2xl bg-card/50 p-4 pt-12 relative">
+              {/* Top bar with Firewall and S3 */}
+              <div className="absolute -top-3 left-4 right-4 flex items-center justify-between">
+                <span className="bg-background px-2 text-xs font-semibold text-primary flex items-center gap-1">
                   <Shield className="w-3 h-3" /> Private Network (No Public IPs)
                 </span>
+                <div className="flex items-center gap-3">
+                  {/* Firewall badge */}
+                  <div className="bg-red-100 dark:bg-red-900/30 border border-red-500 rounded-lg px-3 py-1 flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-red-600 dark:text-red-400" />
+                    <span className="text-xs font-semibold text-red-800 dark:text-red-200">Firewall</span>
+                  </div>
+                  {/* S3 Storage badge */}
+                  <div className="bg-orange-100 dark:bg-orange-900/30 border border-orange-500 rounded-lg px-3 py-1 flex items-center gap-1.5">
+                    <HardDrive className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                    <span className="text-xs font-semibold text-orange-800 dark:text-orange-200">S3 Snapshots</span>
+                  </div>
+                </div>
               </div>
               
               <div className="flex gap-4 h-full">
@@ -151,6 +165,7 @@ export function Architecture() {
                 </div>
               </div>
             </div>
+
           </div>
 
           {/* Legend */}
@@ -170,6 +185,14 @@ export function Architecture() {
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 rounded bg-green-200 dark:bg-green-800 border border-green-500" />
               <span>NAT Gateway</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded bg-red-200 dark:bg-red-800 border border-red-500" />
+              <span>Firewall</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded bg-orange-200 dark:bg-orange-800 border border-orange-500" />
+              <span>S3 Storage</span>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-4 border-t-2 border-dashed border-primary" />
