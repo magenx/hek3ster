@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Github, ArrowRight, BrainCircuit, ShieldCheck, Euro } from "lucide-react";
+import { Github, ExternalLink, BrainCircuit, ShieldCheck, Euro } from "lucide-react";
 
 const stats = [
   { icon: BrainCircuit, value: "AI Manager", label: "Intelligent Interface" },
