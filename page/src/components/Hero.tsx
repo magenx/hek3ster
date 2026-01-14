@@ -4,7 +4,7 @@ import { Github, ArrowRight, BrainCircuit, ShieldCheck, Euro } from "lucide-reac
 const stats = [
   { icon: BrainCircuit, value: "AI Manager", label: "Intelligent Interface" },
   { icon: ShieldCheck, value: "Security First", label: "Air-gapped Environment" },
-  { icon: Euro, value: "80% Savings", label: "Compared to Others" },
+  { icon: Euro, value: "85% Savings", label: "Compared to Others" },
 ];
 
 export function Hero() {
