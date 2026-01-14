@@ -3,8 +3,8 @@ import { Badge } from "@/components/ui/badge";
 const pricingPlans = [{
   name: "hek3ster + Hetzner Cloud",
   badge: "Best Value",
-  price: "$158",
-  subtitle: "Infrastructure only — 3 masters + 10 workers",
+  price: "€142",
+  subtitle: "Infrastructure only - 3 masters + 10 workers",
   features: [{
     text: "hek3ster is 100% free",
     included: true
@@ -12,32 +12,32 @@ const pricingPlans = [{
     text: "Pay only for Hetzner servers",
     included: true
   }, {
-    text: "No management platform fees",
+    text: "No management service fees",
     included: true
   }, {
-    text: "Traffic & DDoS protection included",
+    text: "Firewall protection included",
     included: true
   }, {
-    text: "Full infrastructure control",
+    text: "Nat Gateway and LoadBalancer included",
     included: true
   }],
   highlighted: true
 }, {
-  name: "AWS EKS",
+  name: "AWS Kubernetes",
   badge: "10x More",
-  price: "$1,595+",
+  price: "€1,495+",
   subtitle: "Same cluster size, different cloud",
   features: [{
-    text: "$73/month control plane fee",
+    text: "€73/month control plane fee",
     included: false
   }, {
     text: "~$1,440/month for 10 EC2 instances",
     included: false
   }, {
-    text: "~$81/month for Network Load Balancer",
+    text: "~€75/month for Load Balancer",
     included: false
   }, {
-    text: "+ data transfer, EBS",
+    text: "Data transfer, EBS",
     included: false
   }, {
     text: "Complex pricing model",
@@ -45,21 +45,21 @@ const pricingPlans = [{
   }],
   highlighted: false
 }, {
-  name: "Managed Platform on Hetzner",
+  name: "Managed Service + Hetzner",
   badge: "2x More",
-  price: "$368+",
+  price: "€375+",
   subtitle: "Same infrastructure + platform fees",
   features: [{
-    text: "Per-vCPU management fees",
+    text: "Per CPU management fees",
     included: false
   }, {
-    text: "Control plane fee (Pro tier)",
+    text: "Control plane fee",
     included: false
   }, {
-    text: "Third-party account required",
+    text: "Account sign-up required",
     included: false
   }, {
-    text: "API token shared with platform",
+    text: "Shared API token with platform",
     included: false
   }],
   highlighted: false
@@ -99,10 +99,10 @@ export function Pricing() {
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Save Up to <span className="text-gradient">80%</span> vs Other Cloud Providers
+            Experience major cloud savings versus cloud providers
           </h2>
           <p className="text-lg text-muted-foreground">
-            hek3ster is free — you only pay for Hetzner Cloud infrastructure
+            hek3ster is free open-source software that deploys to Hetzner Cloud
           </p>
         </div>
 
