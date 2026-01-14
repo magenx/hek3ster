@@ -49,7 +49,7 @@ jobs:
 
           if [[ -n $(git status --porcelain) ]]; then
             git add .
-            git commit -m "Apply Go file formatting (via gofmt and goimports)"
+            git commit -m "Apply Go file formatting"
             git push origin HEAD:${{ github.event.pull_request.head.ref }}
           else
             echo "No formatting changes to commit."
