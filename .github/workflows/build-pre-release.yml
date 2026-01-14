@@ -1,4 +1,4 @@
-name: Build Go App for Pre-Release
+name: Build Go App for Release
 
 on:
   release:
@@ -6,14 +6,14 @@ on:
 
 env:
   PRELELEASE_TYPE: ${{ vars.PRERELEASE_TYPE }}
+  GO_VERSION: ${{ vars.GO_VERSION }}
 
 concurrency:
   group: build
   cancel-in-progress: true
 
 jobs:
-  build-pre-release:
-    if: "${{ github.event.release.prerelease == true }}"
+  build-release:
     name: Build Go Binary - ${{ matrix.os }}-${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -34,6 +34,9 @@ jobs:
             runner: macos-latest
             goos: darwin
             goarch: arm64
+    env:
+      GOOS: ${{ matrix.goos }}
+      GOARCH: ${{ matrix.goarch }}
     steps:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -41,19 +44,23 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
         with:
-          go-version: '1.25.0'
+          go-version: ${{ env.GO_VERSION }}
           cache: true
 
-      - name: Build binary
-        id: build
+      - name: Run all tests
+        if: "${{ github.event.release.prerelease == true }}"
+        id: test
         env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-          GH_TOKEN: ${{ secrets.HEK3STER_TOKEN }}
+          CGO_ENABLED: 1
         run: |
           # Run all test
-          CGO_ENABLED=1 go test -v -race -coverprofile=coverage.out ./...
-          
+          go test -v -race -coverprofile=coverage.out ./...
+      
+      - name: Build go binary
+        id: build
+        env:
+          CGO_ENABLED: 0
+        run: |
           # Fetch the version from the GitHub release tag
           VERSION="${{ github.event.release.tag_name }}"
           
@@ -65,7 +72,7 @@ jobs:
           echo "Building ${BINARY_NAME_ARCH} with version ${VERSION}"
           
           # Build the Go binary with version information embedded via -ldflags
-          CGO_ENABLED=0 go build -ldflags "-X github.com/magenx/${GITHUB_REPOSITORY##*/}/pkg/version.Version=${VERSION} -s -w" -o "${BINARY_NAME_ARCH}" ./cmd/${GITHUB_REPOSITORY##*/}
+          go build -ldflags "-X github.com/magenx/${GITHUB_REPOSITORY##*/}/pkg/version.Version=${VERSION} -s -w" -o "${BINARY_NAME_ARCH}" ./cmd/${GITHUB_REPOSITORY##*/}
           
           # Check if the binary was successfully built
           if [ ! -f "${BINARY_NAME_ARCH}" ]; then
@@ -76,8 +83,8 @@ jobs:
           # Create checksum
           echo "checksum=$(sha256sum ${BINARY_NAME_ARCH})" >> ${GITHUB_OUTPUT}
 
-      - name: Attach Release Artifact
-        id: attach-release-artifact
+      - name: Upload artifacts to release
+        id: upload-artifact
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         with:
           token: ${{ secrets.HEK3STER_TOKEN }}
