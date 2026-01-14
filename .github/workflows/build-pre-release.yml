@@ -87,8 +87,8 @@ jobs:
           append_body: true
           body: |
             <details>
-            <summary>Installation for **${{ matrix.os }} (${{ matrix.arch }})**</summary>
-            ```bash
+            <summary>Installation for <strong>${{ matrix.os }} (${{ matrix.arch }})</strong></summary>
+            <pre><code>
             curl -fsSLO https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/${{ steps.build.outputs.binary_name_arch }}
             if echo "${{ steps.build.outputs.checksum }}" | sha256sum -c; then
               echo "✅ Verification passed"
@@ -98,5 +98,5 @@ jobs:
             else
               echo "❌ Verification failed"
             fi
-            ```
+            </code></pre>
             </details>
