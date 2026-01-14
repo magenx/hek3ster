@@ -15,7 +15,7 @@ export function Footer() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button size="lg" className="gap-2 shadow-glow" asChild>
-			  <a href="https://github.com/magenx/hek3ster/wiki">
+			  <a href="https://deepwiki.com/magenx/hek3ster">
                 Read the Docs
                 <ExternalLink className="w-4 h-4" />
               </a>

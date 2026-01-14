@@ -54,9 +54,9 @@ export function Hero() {
           {/* CTAs */}
           <div className="flex flex-wrap justify-center gap-4">
             <Button size="lg" className="gap-2 shadow-glow" asChild>
-              <a href="https://magenx.github.io/hek3ster/#docs">
-                Get Started
-                <ArrowRight className="w-4 h-4" />
+              <a href="https://github.com/magenx/hek3ster/wiki">
+                Read the Docs
+                <ExternalLink className="w-4 h-4" />
               </a>
             </Button>
             <Button variant="outline" size="lg" className="gap-2" asChild>
