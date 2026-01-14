@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1-alpha.12](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.11...v1.0.1-alpha.12) (2026-01-14)
+
+
+### 🚦 Maintenance
+
+* Remove unnecessary comment in init function ([#62](https://github.com/magenx/hek3ster/issues/62)) ([10f633e](https://github.com/magenx/hek3ster/commit/10f633eb68b004707650fb21debd43a3a6394933))
+* Update build-pre-release workflow for better output handling ([#61](https://github.com/magenx/hek3ster/issues/61)) ([36b1988](https://github.com/magenx/hek3ster/commit/36b1988545101eb7bca30e82008882ae4f083516))
+
 ## [1.0.1-alpha.11](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.10...v1.0.1-alpha.11) (2026-01-14)
 
 
