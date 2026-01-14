@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.1-alpha.13](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.12...v1.0.1-alpha.13) (2026-01-14)
+
+
+### 🚦 Maintenance
+
+* Delete .github/workflows/build-release.yml ([#66](https://github.com/magenx/hek3ster/issues/66)) ([4ef0868](https://github.com/magenx/hek3ster/commit/4ef0868b33782b443e0cc95e107281977f99c375))
+* Enhance installation summary formatting in YAML ([#65](https://github.com/magenx/hek3ster/issues/65)) ([35f322c](https://github.com/magenx/hek3ster/commit/35f322c240a32c7cb0a56e3031baca4498b4b13d))
+* Fix formatting issues in completion.go ([#71](https://github.com/magenx/hek3ster/issues/71)) ([4a25c47](https://github.com/magenx/hek3ster/commit/4a25c47afa43400452626de745b850ed6154378f))
+* Update fetch-depth for checkout action in workflow ([#70](https://github.com/magenx/hek3ster/issues/70)) ([dfacbce](https://github.com/magenx/hek3ster/commit/dfacbce77f3fbb70dd01d59b766e1c45d84a7869))
+* Update workflow for Go app release process ([#68](https://github.com/magenx/hek3ster/issues/68)) ([89bcfcf](https://github.com/magenx/hek3ster/commit/89bcfcf1fda32668c6559db4be051dd0b9a18b78))
+* **workflow:** Add GitHub Actions workflow for Go formatting ([#67](https://github.com/magenx/hek3ster/issues/67)) ([6c0fcd9](https://github.com/magenx/hek3ster/commit/6c0fcd9b2f0ea9a0dc114299b4074a99802226db))
+
 ## [1.0.1-alpha.12](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.11...v1.0.1-alpha.12) (2026-01-14)
 
 
