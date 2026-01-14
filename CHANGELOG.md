@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1-alpha.11](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.10...v1.0.1-alpha.11) (2026-01-14)
+
+
+### 🚦 Maintenance
+
+* Add comment to init function in completion.go ([#58](https://github.com/magenx/hek3ster/issues/58)) ([742a763](https://github.com/magenx/hek3ster/commit/742a76369e0b7638ded7d35436d20c097841707b))
+* Refactor binary name handling in build workflow ([#57](https://github.com/magenx/hek3ster/issues/57)) ([f6a565e](https://github.com/magenx/hek3ster/commit/f6a565e742a1948ba524f7784135e11236491555))
+
 ## [1.0.1-alpha.10](https://github.com/magenx/hek3ster/compare/v1.0.1-alpha.9...v1.0.1-alpha.10) (2026-01-13)
 
 
