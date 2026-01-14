@@ -14,13 +14,17 @@ export function Footer() {
             Join thousands of developers running production Kubernetes on Hetzner Cloud
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" className="gap-2 shadow-glow">
-              <ExternalLink className="w-4 h-4" />
-              Read the Docs
+            <Button size="lg" className="gap-2 shadow-glow" asChild>
+			  <a href="https://github.com/magenx/hek3ster/wiki">
+                Read the Docs
+                <ExternalLink className="w-4 h-4" />
+              </a>
             </Button>
-            <Button variant="outline" size="lg" className="gap-2">
-              <MessageCircle className="w-4 h-4" />
-              Join Discussions
+            <Button variant="outline" size="lg" className="gap-2" asChild>
+			   <a href="https://github.com/magenx/hek3ster/discussions" target="_blank" rel="noopener noreferrer">
+                <MessageCircle className="w-4 h-4" />
+                Join Discussions
+              </a>
             </Button>
           </div>
         </div>
