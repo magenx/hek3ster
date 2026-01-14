@@ -7,11 +7,8 @@ const steps = [
     number: 1,
     title: "Install hek3ster",
     description: "Download the binary for your platform",
-    code: `# macOS / Linux
-curl -sfL https://get.hek3ster.io | sh
-
-# Homebrew
-brew install hek3ster/tap/hek3ster`,
+    code: `# macOS arm64 / Linux (arm64/amd64)
+https://github.com/magenx/hek3ster/releases`,
   },
   {
     number: 2,
