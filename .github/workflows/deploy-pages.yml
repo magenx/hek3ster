@@ -50,7 +50,7 @@ jobs:
             echo -e "\n</pre></code>" >> ${{ runner.temp }}/lint-output.log
             gh issue create --title "page: Lint code errors detected" \
               --body-file ${{ runner.temp }}/lint-output.log \
-              --assignee "@copilot"
+              --assignee "@me"
             exit 1
           }
 
@@ -67,7 +67,7 @@ jobs:
             echo -e "\n</pre></code>" >> ${{ runner.temp }}/depcheck-output.log
             gh issue create --title "page: Missing imports errors detected" \
               --body-file ${{ runner.temp }}/depcheck-output.log \
-              --assignee "@copilot"
+              --assignee "@me"
             exit 1
           }
 
