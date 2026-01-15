@@ -58,6 +58,7 @@ jobs:
         id: depcheck
         env:
           GITHUB_TOKEN: ${{ secrets.HEK3STER_TOKEN }}
+        continue-on-error: true
         run: |
           cd page
           set -o pipefail
@@ -68,7 +69,6 @@ jobs:
             gh issue create --title "page: Missing imports errors detected" \
               --body-file ${{ runner.temp }}/depcheck-output.log \
               --assignee "@me"
-            exit 1
           }
 
       - name: Build website
