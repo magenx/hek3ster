@@ -261,7 +261,7 @@ func (c *CiliumInstaller) buildHubbleMetrics(customMetrics []string) string {
 		// Default metrics
 		metrics = []string{"dns", "drop", "tcp", "flow", "port-distribution", "icmp", "http"}
 	}
-	
+
 	// Serialize to JSON format
 	jsonBytes, err := json.Marshal(metrics)
 	if err != nil {
