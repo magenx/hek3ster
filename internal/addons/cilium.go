@@ -90,7 +90,7 @@ func (c *CiliumInstaller) ensureHelmInstalled(masterSSHIP string) error {
 
 	// Install Helm using the official get-helm-4 script
 	util.LogInfo("Installing Helm on master node", "cilium")
-	
+
 	// Download and execute the Helm installation script
 	installCmd := "curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 | bash"
 	_, err = c.SSHClient.Run(c.ctx, masterSSHIP, c.Config.Networking.SSH.Port, installCmd, c.Config.Networking.SSH.UseAgent)
