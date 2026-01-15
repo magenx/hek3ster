@@ -314,7 +314,7 @@ func (t *ToolInstaller) InstallCilium() error {
 	}
 
 	// Extract and install
-	if err := t.runCommand("sudo", "tar", "xzvfC", tarballName, "/usr/local/bin"); err != nil {
+	if err := t.runCommand("sudo", "tar", "xzvf", tarballName, "-C", "/usr/local/bin"); err != nil {
 		os.Remove(tarballName)
 		os.Remove(checksumName)
 		return fmt.Errorf("failed to extract cilium CLI: %w", err)
@@ -329,6 +329,11 @@ func (t *ToolInstaller) InstallCilium() error {
 }
 
 // EnsureToolsInstalled checks and installs kubectl, helm, kubectl-ai, and cilium CLI if needed
+// Tools are installed in the following order:
+// 1. kubectl - Kubernetes command-line tool
+// 2. helm - Kubernetes package manager
+// 3. kubectl-ai - AI-powered kubectl assistant
+// 4. cilium - Cilium CNI CLI tool
 func (t *ToolInstaller) EnsureToolsInstalled() error {
 	var errors []string
 

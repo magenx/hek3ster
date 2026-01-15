@@ -1,5 +1,11 @@
 package config
 
+// Default version constants
+const (
+	// DefaultCiliumVersion is the default Cilium version to install
+	DefaultCiliumVersion = "1.17.2"
+)
+
 // Networking represents networking configuration
 type Networking struct {
 	CNI             CNI             `yaml:"cni,omitempty"`
@@ -80,7 +86,7 @@ func (c *Cilium) SetDefaults() {
 		if c.HelmChartVersion != "" {
 			c.Version = c.HelmChartVersion
 		} else {
-			c.Version = "1.17.2"
+			c.Version = DefaultCiliumVersion
 		}
 	}
 	// Keep HelmChartVersion in sync for backwards compatibility

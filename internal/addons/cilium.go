@@ -121,9 +121,9 @@ func (c *CiliumInstaller) installCiliumCLI() error {
 			args = append(args, "--set", "hubble.ui.enabled=true")
 		}
 
-		// Configure Hubble metrics
+		// Configure Hubble metrics - use enabledList for string values
 		if ciliumConfig.HubbleMetrics != "" {
-			args = append(args, "--set", fmt.Sprintf("hubble.metrics.enabled=%s", ciliumConfig.HubbleMetrics))
+			args = append(args, "--set", fmt.Sprintf("hubble.metrics.enabledList=%s", ciliumConfig.HubbleMetrics))
 		}
 	}
 
