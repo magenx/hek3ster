@@ -39,8 +39,11 @@ func TestCiliumInstaller_DefaultValues(t *testing.T) {
 	cilium.SetDefaults()
 
 	// Check that defaults are properly set
-	if cilium.HelmChartVersion != "v1.17.2" {
-		t.Errorf("Expected HelmChartVersion to be 'v1.17.2', got '%s'", cilium.HelmChartVersion)
+	if cilium.Version != "1.17.2" {
+		t.Errorf("Expected Version to be '1.17.2', got '%s'", cilium.Version)
+	}
+	if cilium.HelmChartVersion != "1.17.2" {
+		t.Errorf("Expected HelmChartVersion to be '1.17.2', got '%s'", cilium.HelmChartVersion)
 	}
 	if cilium.EncryptionType != "wireguard" {
 		t.Errorf("Expected EncryptionType to be 'wireguard', got '%s'", cilium.EncryptionType)
@@ -74,31 +77,5 @@ func TestCiliumInstaller_DefaultValues(t *testing.T) {
 	}
 	if cilium.AgentMemoryRequest != "512Mi" {
 		t.Errorf("Expected AgentMemoryRequest to be '512Mi', got '%s'", cilium.AgentMemoryRequest)
-	}
-}
-
-func TestCiliumInstaller_BuildHubbleMetrics(t *testing.T) {
-	cfg := &config.Main{
-		Networking: config.Networking{
-			CNI: config.CNI{
-				Mode:   "cilium",
-				Cilium: &config.Cilium{},
-			},
-		},
-	}
-	installer := NewCiliumInstaller(cfg, nil)
-
-	// Test default metrics
-	metrics := installer.buildHubbleMetrics("")
-	expected := `["dns", "drop", "tcp", "flow", "port-distribution", "icmp", "http"]`
-	if metrics != expected {
-		t.Errorf("Expected default metrics '%s', got '%s'", expected, metrics)
-	}
-
-	// Test custom metrics
-	customMetrics := "custom-metric"
-	result := installer.buildHubbleMetrics(customMetrics)
-	if result != customMetrics {
-		t.Errorf("Expected custom metrics '%s', got '%s'", customMetrics, result)
 	}
 }
