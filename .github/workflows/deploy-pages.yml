@@ -44,10 +44,10 @@ jobs:
         run: |
           cd page
           set -o pipefail
-          echo -e "Copilot,\nPlease address these errors and create PR. \n\n```" > ${{ runner.temp }}/lint-output.log
+          echo -e "Copilot,\nPlease address these errors and create PR. \n\n<pre><code>" > ${{ runner.temp }}/lint-output.log
           npx eslint . 2>&1 | tee -a ${{ runner.temp }}/lint-output.log || {
             echo "Lint errors detected! Creating an issue ->"
-            echo -e "\n```" >> ${{ runner.temp }}/lint-output.log
+            echo -e "\n</pre></code>" >> ${{ runner.temp }}/lint-output.log
             gh issue create --title "page: Lint code errors detected" \
               --body-file ${{ runner.temp }}/lint-output.log \
               --assignee "@copilot"
@@ -61,10 +61,10 @@ jobs:
         run: |
           cd page
           set -o pipefail
-          echo -e "Copilot,\nPlease address these errors and create PR. \n\n```" > ${{ runner.temp }}/depcheck-output.log
+          echo -e "Copilot,\nPlease address these errors and create PR. \n\n<pre><code>" > ${{ runner.temp }}/depcheck-output.log
           npx depcheck 2>&1 | tee -a ${{ runner.temp }}/depcheck-output.log || {
             echo "Missing imports detected! Creating an issue ->"
-            echo -e "\n```" >> ${{ runner.temp }}/depcheck-output.log
+            echo -e "\n</pre></code>" >> ${{ runner.temp }}/depcheck-output.log
             gh issue create --title "page: Missing imports errors detected" \
               --body-file ${{ runner.temp }}/depcheck-output.log \
               --assignee "@copilot"
