@@ -61,7 +61,7 @@ type Cilium struct {
 	RoutingMode           string `yaml:"routing_mode,omitempty"`
 	TunnelProtocol        string `yaml:"tunnel_protocol,omitempty"`
 	HubbleEnabled         *bool  `yaml:"hubble_enabled,omitempty"`
-	HubbleMetrics         string `yaml:"hubble_metrics,omitempty"`
+	HubbleMetrics         []string `yaml:"hubble_metrics,omitempty"`
 	HubbleRelayEnabled    *bool  `yaml:"hubble_relay_enabled,omitempty"`
 	HubbleUIEnabled       *bool  `yaml:"hubble_ui_enabled,omitempty"`
 	K8sServiceHost        string `yaml:"k8s_service_host,omitempty"`
