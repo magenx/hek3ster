@@ -53,22 +53,60 @@ func (c *CiliumInstaller) Install(firstMaster *hcloud.Server, masterSSHIP string
 
 	util.LogInfo("Installing Cilium CNI", "cilium")
 
-	// Step 1: Add Cilium Helm repository
+	// Step 1: Ensure Helm is installed on the master node
+	if err := c.ensureHelmInstalled(masterSSHIP); err != nil {
+		return fmt.Errorf("failed to ensure Helm is installed: %w", err)
+	}
+
+	// Step 2: Add Cilium Helm repository
 	if err := c.addHelmRepo(masterSSHIP); err != nil {
 		return fmt.Errorf("failed to add Cilium Helm repository: %w", err)
 	}
 
-	// Step 2: Install Cilium using Helm
+	// Step 3: Install Cilium using Helm
 	if err := c.installCiliumHelm(masterSSHIP); err != nil {
 		return fmt.Errorf("failed to install Cilium: %w", err)
 	}
 
-	// Step 3: Wait for Cilium to be ready
+	// Step 4: Wait for Cilium to be ready
 	if err := c.waitForCiliumReady(masterSSHIP); err != nil {
 		return fmt.Errorf("failed to verify Cilium status: %w", err)
 	}
 
 	util.LogSuccess("Cilium CNI installed successfully", "cilium")
+	return nil
+}
+
+// ensureHelmInstalled ensures Helm is installed on the remote master node
+func (c *CiliumInstaller) ensureHelmInstalled(masterSSHIP string) error {
+	// Check if Helm is already installed
+	checkCmd := "command -v helm > /dev/null 2>&1"
+	_, err := c.SSHClient.Run(c.ctx, masterSSHIP, c.Config.Networking.SSH.Port, checkCmd, c.Config.Networking.SSH.UseAgent)
+	if err == nil {
+		// Helm is already installed
+		util.LogInfo("Helm is already installed on master node", "cilium")
+		return nil
+	}
+
+	// Install Helm using the official get-helm-4 script
+	util.LogInfo("Installing Helm on master node", "cilium")
+	
+	// Download and execute the Helm installation script
+	installCmd := "curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 | bash"
+	_, err = c.SSHClient.Run(c.ctx, masterSSHIP, c.Config.Networking.SSH.Port, installCmd, c.Config.Networking.SSH.UseAgent)
+	if err != nil {
+		return fmt.Errorf("failed to install Helm: %w", err)
+	}
+
+	// Verify Helm installation
+	verifyCmd := "helm version"
+	output, err := c.SSHClient.Run(c.ctx, masterSSHIP, c.Config.Networking.SSH.Port, verifyCmd, c.Config.Networking.SSH.UseAgent)
+	if err != nil {
+		return fmt.Errorf("failed to verify Helm installation: %w", err)
+	}
+
+	util.LogSuccess("Helm installed successfully on master node", "cilium")
+	util.LogInfo(fmt.Sprintf("Helm version: %s", strings.TrimSpace(output)), "cilium")
 	return nil
 }
 
