@@ -38,14 +38,38 @@ jobs:
           npm ci
 
       - name: Lint Code
+        id: lint
+        env:
+          GITHUB_TOKEN: ${{ secrets.HEK3STER_TOKEN }}
         run: |
           cd page
-          npx eslint .
+          set -o pipefail
+          echo -e "Copilot,\nPlease address these errors and create PR. \n\n```" > ${{ runner.temp }}/lint-output.log
+          npx eslint . 2>&1 | tee -a ${{ runner.temp }}/lint-output.log || {
+            echo "Lint errors detected! Creating an issue ->"
+            echo -e "\n```" >> ${{ runner.temp }}/lint-output.log
+            gh issue create --title "page: Lint code errors detected" \
+              --body-file ${{ runner.temp }}/lint-output.log \
+              --assignee "@copilot"
+            exit 1
+          }
 
       - name: Check Missing Imports
+        id: depcheck
+        env:
+          GITHUB_TOKEN: ${{ secrets.HEK3STER_TOKEN }}
         run: |
           cd page
-          npx depcheck
+          set -o pipefail
+          echo -e "Copilot,\nPlease address these errors and create PR. \n\n```" > ${{ runner.temp }}/depcheck-output.log
+          npx depcheck 2>&1 | tee -a ${{ runner.temp }}/depcheck-output.log || {
+            echo "Missing imports detected! Creating an issue ->"
+            echo -e "\n```" >> ${{ runner.temp }}/depcheck-output.log
+            gh issue create --title "page: Missing imports errors detected" \
+              --body-file ${{ runner.temp }}/depcheck-output.log \
+              --assignee "@copilot"
+            exit 1
+          }
 
       - name: Build website
         run: |
