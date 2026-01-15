@@ -3,6 +3,7 @@ package addons
 import (
 	"context"
 	_ "embed"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -250,14 +251,24 @@ func (c *CiliumInstaller) generateHelmValues() (string, error) {
 	return result.String(), nil
 }
 
-// buildHubbleMetrics builds Hubble metrics array from string
-func (c *CiliumInstaller) buildHubbleMetrics(customMetrics string) string {
-	if customMetrics != "" {
-		// Parse custom metrics string
-		return customMetrics
+// buildHubbleMetrics builds Hubble metrics array from slice
+func (c *CiliumInstaller) buildHubbleMetrics(customMetrics []string) string {
+	var metrics []string
+	if len(customMetrics) > 0 {
+		// Use custom metrics
+		metrics = customMetrics
+	} else {
+		// Default metrics
+		metrics = []string{"dns", "drop", "tcp", "flow", "port-distribution", "icmp", "http"}
 	}
-	// Default metrics
-	return `["dns", "drop", "tcp", "flow", "port-distribution", "icmp", "http"]`
+	
+	// Serialize to JSON format
+	jsonBytes, err := json.Marshal(metrics)
+	if err != nil {
+		// Fallback to default if serialization fails
+		return `["dns", "drop", "tcp", "flow", "port-distribution", "icmp", "http"]`
+	}
+	return string(jsonBytes)
 }
 
 // waitForCiliumReady waits for Cilium to be ready

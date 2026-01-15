@@ -140,3 +140,100 @@ public_network:
 		t.Errorf("Expected HetznerIPsQueryServerURL to be 'http://example.com/ips', got '%s'", config.PublicNetwork.HetznerIPsQueryServerURL)
 	}
 }
+
+func TestCilium_HubbleMetrics_UnmarshalArray(t *testing.T) {
+	yamlContent := `
+cni:
+  mode: cilium
+  cilium:
+    enabled: true
+    hubble_metrics:
+      - dns
+      - drop
+      - tcp
+      - flow
+      - port-distribution
+      - icmp
+      - http
+`
+
+	var networking Networking
+	err := yaml.Unmarshal([]byte(yamlContent), &networking)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal YAML: %v", err)
+	}
+
+	if networking.CNI.Mode != "cilium" {
+		t.Errorf("Expected CNI mode 'cilium', got '%s'", networking.CNI.Mode)
+	}
+
+	if networking.CNI.Cilium == nil {
+		t.Fatal("Expected Cilium config to be non-nil")
+	}
+
+	if !networking.CNI.Cilium.Enabled {
+		t.Error("Expected Cilium to be enabled")
+	}
+
+	expectedMetrics := []string{"dns", "drop", "tcp", "flow", "port-distribution", "icmp", "http"}
+	if len(networking.CNI.Cilium.HubbleMetrics) != len(expectedMetrics) {
+		t.Errorf("Expected %d metrics, got %d", len(expectedMetrics), len(networking.CNI.Cilium.HubbleMetrics))
+	}
+
+	for i, metric := range expectedMetrics {
+		if i >= len(networking.CNI.Cilium.HubbleMetrics) {
+			t.Errorf("Missing metric at index %d: %s", i, metric)
+			continue
+		}
+		if networking.CNI.Cilium.HubbleMetrics[i] != metric {
+			t.Errorf("Expected metric '%s' at index %d, got '%s'", metric, i, networking.CNI.Cilium.HubbleMetrics[i])
+		}
+	}
+}
+
+func TestCilium_HubbleMetrics_EmptyArray(t *testing.T) {
+	yamlContent := `
+cni:
+  mode: cilium
+  cilium:
+    enabled: true
+    hubble_metrics: []
+`
+
+	var networking Networking
+	err := yaml.Unmarshal([]byte(yamlContent), &networking)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal YAML: %v", err)
+	}
+
+	if networking.CNI.Cilium == nil {
+		t.Fatal("Expected Cilium config to be non-nil")
+	}
+
+	if len(networking.CNI.Cilium.HubbleMetrics) != 0 {
+		t.Errorf("Expected empty metrics array, got %d items", len(networking.CNI.Cilium.HubbleMetrics))
+	}
+}
+
+func TestCilium_HubbleMetrics_NotProvided(t *testing.T) {
+	yamlContent := `
+cni:
+  mode: cilium
+  cilium:
+    enabled: true
+`
+
+	var networking Networking
+	err := yaml.Unmarshal([]byte(yamlContent), &networking)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal YAML: %v", err)
+	}
+
+	if networking.CNI.Cilium == nil {
+		t.Fatal("Expected Cilium config to be non-nil")
+	}
+
+	if networking.CNI.Cilium.HubbleMetrics != nil {
+		t.Errorf("Expected nil metrics when not provided, got %v", networking.CNI.Cilium.HubbleMetrics)
+	}
+}

@@ -88,17 +88,18 @@ func TestCiliumInstaller_BuildHubbleMetrics(t *testing.T) {
 	}
 	installer := NewCiliumInstaller(cfg, nil)
 
-	// Test default metrics
-	metrics := installer.buildHubbleMetrics("")
-	expected := `["dns", "drop", "tcp", "flow", "port-distribution", "icmp", "http"]`
+	// Test default metrics (empty slice)
+	metrics := installer.buildHubbleMetrics([]string{})
+	expected := `["dns","drop","tcp","flow","port-distribution","icmp","http"]`
 	if metrics != expected {
 		t.Errorf("Expected default metrics '%s', got '%s'", expected, metrics)
 	}
 
 	// Test custom metrics
-	customMetrics := "custom-metric"
+	customMetrics := []string{"dns", "tcp", "http"}
 	result := installer.buildHubbleMetrics(customMetrics)
-	if result != customMetrics {
-		t.Errorf("Expected custom metrics '%s', got '%s'", customMetrics, result)
+	expectedCustom := `["dns","tcp","http"]`
+	if result != expectedCustom {
+		t.Errorf("Expected custom metrics '%s', got '%s'", expectedCustom, result)
 	}
 }
