@@ -60,10 +60,10 @@ func (c *CNI) SetDefaults() {
 // Cilium represents Cilium CNI configuration
 type Cilium struct {
 	Enabled               bool   `yaml:"enabled,omitempty"`
-	Version               string `yaml:"version,omitempty"`               // Cilium version for CLI installation
-	EncryptionType        string `yaml:"encryption_type,omitempty"`        // wireguard or ipsec
-	RoutingMode           string `yaml:"routing_mode,omitempty"`           // tunnel or native
-	TunnelProtocol        string `yaml:"tunnel_protocol,omitempty"`        // vxlan or geneve
+	Version               string `yaml:"version,omitempty"`         // Cilium version for CLI installation
+	EncryptionType        string `yaml:"encryption_type,omitempty"` // wireguard or ipsec
+	RoutingMode           string `yaml:"routing_mode,omitempty"`    // tunnel or native
+	TunnelProtocol        string `yaml:"tunnel_protocol,omitempty"` // vxlan or geneve
 	HubbleEnabled         *bool  `yaml:"hubble_enabled,omitempty"`
 	HubbleMetrics         string `yaml:"hubble_metrics,omitempty"`
 	HubbleRelayEnabled    *bool  `yaml:"hubble_relay_enabled,omitempty"`
