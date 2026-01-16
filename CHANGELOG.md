@@ -1,5 +1,64 @@
 # Changelog
 
+## [1.0.2](https://github.com/magenx/hek3ster/compare/v1.0.1...v1.0.2) (2026-01-16)
+
+
+### 🐛 Bug Fixes
+
+* **addons:** Change HubbleMetrics type from string to []string ([#109](https://github.com/magenx/hek3ster/issues/109)) ([80d2823](https://github.com/magenx/hek3ster/commit/80d2823c17869b51834a85759e94c413796bb915))
+* **addons:** Fix Cilium CNI installation failure with tilde-prefixed kubeconfig paths ([#117](https://github.com/magenx/hek3ster/issues/117)) ([9f15d14](https://github.com/magenx/hek3ster/commit/9f15d14327b8e9572c2cfcea5f1bf6dc88b9a939))
+* **addons:** Replace Helm-based Cilium installation with official Cilium CLI approach ([#108](https://github.com/magenx/hek3ster/issues/108)) ([e5eb7fe](https://github.com/magenx/hek3ster/commit/e5eb7fe258bcfa681a8a98aa5e531e3eff69d492))
+* **load balancer:** Fix load balancer network attachment validation for private IP targets ([#120](https://github.com/magenx/hek3ster/issues/120)) ([cf0108b](https://github.com/magenx/hek3ster/commit/cf0108be1732b2a8f1f59ca05c98f9fe5ff8bd73))
+
+
+### 🚦 Maintenance
+
+* Add build workflow dispatch for pre-release and release ([#130](https://github.com/magenx/hek3ster/issues/130)) ([aeada54](https://github.com/magenx/hek3ster/commit/aeada54808421c4db34c6db784b962d979d13b84))
+* Add comment placeholder in init function ([#131](https://github.com/magenx/hek3ster/issues/131)) ([d82552a](https://github.com/magenx/hek3ster/commit/d82552a3224366b670585e571d96eac59411806a))
+* Add comment placeholder in init function ([#141](https://github.com/magenx/hek3ster/issues/141)) ([9f6bf6e](https://github.com/magenx/hek3ster/commit/9f6bf6e71e5757e3bb0a881a92cc52a120eace3f))
+* Add conditional check for dispatching build workflow ([#135](https://github.com/magenx/hek3ster/issues/135)) ([3a99b13](https://github.com/magenx/hek3ster/commit/3a99b1379a082e0f22cecb210e9783ce7537a725))
+* Add draft option to release configuration ([#128](https://github.com/magenx/hek3ster/issues/128)) ([f34a482](https://github.com/magenx/hek3ster/commit/f34a482f5ffca8cd7c9a4b65dda305569d1b7008))
+* Change prerelease setting to false ([#144](https://github.com/magenx/hek3ster/issues/144)) ([6c2a64f](https://github.com/magenx/hek3ster/commit/6c2a64f23a2f563b7b763dd7f57f1dfd385a4627))
+* Change trigger from release to repository_dispatch ([#129](https://github.com/magenx/hek3ster/issues/129)) ([2975120](https://github.com/magenx/hek3ster/commit/29751208759de313eb6e8d0ddbf253fbf8d777c9))
+* **copilot:** Add GitHub Copilot custom instructions for repository context ([#111](https://github.com/magenx/hek3ster/issues/111)) ([bc2d1fd](https://github.com/magenx/hek3ster/commit/bc2d1fd2c1ff291f1b015ec16bc705e650d7ce58))
+* **deps:** bump @radix-ui/react-toast from 1.2.14 to 1.2.15 in /page ([#88](https://github.com/magenx/hek3ster/issues/88)) ([824faea](https://github.com/magenx/hek3ster/commit/824faea292e690a571e30ba4ffe848144ec43a37))
+* **deps:** bump next-themes from 0.3.0 to 0.4.6 in /page ([#87](https://github.com/magenx/hek3ster/issues/87)) ([1b11ef2](https://github.com/magenx/hek3ster/commit/1b11ef2463ae49025b46b782dd91f9f8f77852e9))
+* Fix JSON formatting in release workflow ([#140](https://github.com/magenx/hek3ster/issues/140)) ([825bb13](https://github.com/magenx/hek3ster/commit/825bb13ad0423ce17546674906614edf316721e9))
+* **main:** hek3ster 1.0.2-alpha ([#112](https://github.com/magenx/hek3ster/issues/112)) ([c10e831](https://github.com/magenx/hek3ster/commit/c10e831628bf15fd6d0d92de6adbca65681009dd))
+* **main:** hek3ster 1.0.2-alpha.1 ([#118](https://github.com/magenx/hek3ster/issues/118)) ([ca408a0](https://github.com/magenx/hek3ster/commit/ca408a0852c918122bcf098edbfc8a0a722859cc))
+* **main:** hek3ster 1.0.2-alpha.2 ([#126](https://github.com/magenx/hek3ster/issues/126)) ([ed2aa4e](https://github.com/magenx/hek3ster/commit/ed2aa4e7733fda56cdd05b3008362676955ca95b))
+* **main:** hek3ster 1.0.2-alpha.3 ([#132](https://github.com/magenx/hek3ster/issues/132)) ([b99d150](https://github.com/magenx/hek3ster/commit/b99d15032fa2ed7076593d2a00ec9b779de594a3))
+* **main:** hek3ster 1.0.2-alpha.4 ([#138](https://github.com/magenx/hek3ster/issues/138)) ([16f6d59](https://github.com/magenx/hek3ster/commit/16f6d59f526b333c85b88e81b504d59d873b4020))
+* **main:** hek3ster 1.0.2-alpha.5 ([#142](https://github.com/magenx/hek3ster/issues/142)) ([23db646](https://github.com/magenx/hek3ster/commit/23db646e4ac42dd89431856d0e061780dffdf9f2))
+* **main:** hek3ster 1.0.2-alpha.6 ([#146](https://github.com/magenx/hek3ster/issues/146)) ([4fecadc](https://github.com/magenx/hek3ster/commit/4fecadc11af252a1f4001a69c72151d67ab560f5))
+* Modify build workflow for draft releases ([#124](https://github.com/magenx/hek3ster/issues/124)) ([6992579](https://github.com/magenx/hek3ster/commit/699257982c3d80d35fe4b544a7675ddd7adf4fb2))
+* **page:** Add HardDrive and ShieldCheck icons to Architecture ([#77](https://github.com/magenx/hek3ster/issues/77)) ([5a16d47](https://github.com/magenx/hek3ster/commit/5a16d4725545d58a0aabd58324d3077f8123d78c))
+* **page:** Add links to github wiki ([#76](https://github.com/magenx/hek3ster/issues/76)) ([ffe7f3a](https://github.com/magenx/hek3ster/commit/ffe7f3ac6c1aa7de8ddfeec1010f5a1f30b059cb))
+* **page:** Add linting and dependency check to deploy workflow ([#91](https://github.com/magenx/hek3ster/issues/91)) ([5a79a8b](https://github.com/magenx/hek3ster/commit/5a79a8bda4119f1be23727b01f0e0e0e6375eeaa))
+* **page:** Add npm updates to dependabot configuration ([#85](https://github.com/magenx/hek3ster/issues/85)) ([efab961](https://github.com/magenx/hek3ster/commit/efab9615ec9d772225faee42f0f06486b628b6c7))
+* **page:** Allow Check Missing Imports to continue on error ([#102](https://github.com/magenx/hek3ster/issues/102)) ([e32e65f](https://github.com/magenx/hek3ster/commit/e32e65fe4274e6f201372c7ea48660f6f46bf093))
+* **page:** Change issue assignee from copilot to me ([#98](https://github.com/magenx/hek3ster/issues/98)) ([0f00725](https://github.com/magenx/hek3ster/commit/0f007252cb619fb558aad5eec2f4dcb2e8576f8c))
+* **page:** Enable cancellation of in-progress page deployments ([#104](https://github.com/magenx/hek3ster/issues/104)) ([e154567](https://github.com/magenx/hek3ster/commit/e15456777c5f1f19999bc263429a2000c6c6865c))
+* **page:** Enhance CI with linting and depcheck error handling ([#93](https://github.com/magenx/hek3ster/issues/93)) ([4b2d09d](https://github.com/magenx/hek3ster/commit/4b2d09dc4d0a199f901911fbbf0e2a122ba40942))
+* **page:** Enhance Global Load Balancer with Firewall label ([#92](https://github.com/magenx/hek3ster/issues/92)) ([145df48](https://github.com/magenx/hek3ster/commit/145df48bba5fc6fdeb58915c20050a55818ebf30))
+* **page:** Fix lint errors in UI components ([#97](https://github.com/magenx/hek3ster/issues/97)) ([a2282e1](https://github.com/magenx/hek3ster/commit/a2282e10fe6ab1c8a9cbcc7152fce39faa520eef))
+* **page:** Modify hek3ster installation code snippet ([#75](https://github.com/magenx/hek3ster/issues/75)) ([e40d6e7](https://github.com/magenx/hek3ster/commit/e40d6e7e78a725c6cb554d072a519348c750e288))
+* **page:** Remove unused dependencies from page/ ([#100](https://github.com/magenx/hek3ster/issues/100)) ([a74142d](https://github.com/magenx/hek3ster/commit/a74142d830c7ebeacc97a9784b7751853d5bdf80))
+* **page:** Replace Github icon import with ExternalLink ([#83](https://github.com/magenx/hek3ster/issues/83)) ([0134aed](https://github.com/magenx/hek3ster/commit/0134aed8baad0ca93632da7c7dc2f2d60b0adfdd))
+* **page:** Update documentation link in Hero component ([#84](https://github.com/magenx/hek3ster/issues/84)) ([9aaba59](https://github.com/magenx/hek3ster/commit/9aaba594c171fffa345af1f63d532c6dce6a13f2))
+* **page:** Update footer link to new documentation site ([#82](https://github.com/magenx/hek3ster/issues/82)) ([4c6dfdb](https://github.com/magenx/hek3ster/commit/4c6dfdbffb7d6c7cb08a17811b37a10b565931ba))
+* **page:** Update log formatting in deploy-pages.yml ([#95](https://github.com/magenx/hek3ster/issues/95)) ([3fdd967](https://github.com/magenx/hek3ster/commit/3fdd967bc88c77478904df5601140b0f17800b72))
+* **page:** Update pricing details and improve descriptions ([#79](https://github.com/magenx/hek3ster/issues/79)) ([ae1e7b9](https://github.com/magenx/hek3ster/commit/ae1e7b928802dab9bb83b3e381121efa86948e48))
+* **page:** Update pricing per custom setup upto date ([#78](https://github.com/magenx/hek3ster/issues/78)) ([8cb4cde](https://github.com/magenx/hek3ster/commit/8cb4cde0998982201c0f8a8e517d1ae5454d1148))
+* **page:** Update savings percentage from 80% to 85% ([#80](https://github.com/magenx/hek3ster/issues/80)) ([a343a2a](https://github.com/magenx/hek3ster/commit/a343a2a90de37b010aea6ed4136eeab861cdf258))
+* **release:** Add draft option to prerelease configuration ([#122](https://github.com/magenx/hek3ster/issues/122)) ([ace11d3](https://github.com/magenx/hek3ster/commit/ace11d3624302d65b46cba16a492abc959adc9a7))
+* Remove 'pr' field from release workflow payloads ([#136](https://github.com/magenx/hek3ster/issues/136)) ([88918ba](https://github.com/magenx/hek3ster/commit/88918ba88bfbc32d57420049085545b429c22277))
+* Remove commented-out code in init function ([#125](https://github.com/magenx/hek3ster/issues/125)) ([4f781da](https://github.com/magenx/hek3ster/commit/4f781da51a9e40175be08ebea0f0fe2bb24951da))
+* Remove commented-out code in init function ([#137](https://github.com/magenx/hek3ster/issues/137)) ([87ca005](https://github.com/magenx/hek3ster/commit/87ca005dc2887a801e62fa849449b135a2522ce3))
+* Remove condition for dispatching build workflow ([#133](https://github.com/magenx/hek3ster/issues/133)) ([ac1cc3e](https://github.com/magenx/hek3ster/commit/ac1cc3e0e49ed67372d81f0bd816b4965c54d008))
+* Remove unnecessary comment in init function ([#145](https://github.com/magenx/hek3ster/issues/145)) ([e5ff4ce](https://github.com/magenx/hek3ster/commit/e5ff4cef76ba28cd064bacf6664ab9c44921c287))
+* **workflow:** Rename build-pre-release.yml to build_for_release.yml ([#81](https://github.com/magenx/hek3ster/issues/81)) ([930d357](https://github.com/magenx/hek3ster/commit/930d357819e2f7ee103455e0bff3619eff5789dc))
+
 ## [1.0.2-alpha.6](https://github.com/magenx/hek3ster/compare/v1.0.2-alpha.5...v1.0.2-alpha.6) (2026-01-16)
 
 
