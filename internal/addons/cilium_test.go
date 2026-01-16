@@ -42,9 +42,6 @@ func TestCiliumInstaller_DefaultValues(t *testing.T) {
 	if cilium.Version != "1.17.2" {
 		t.Errorf("Expected Version to be '1.17.2', got '%s'", cilium.Version)
 	}
-	if cilium.HelmChartVersion != "1.17.2" {
-		t.Errorf("Expected HelmChartVersion to be '1.17.2', got '%s'", cilium.HelmChartVersion)
-	}
 	if cilium.EncryptionType != "wireguard" {
 		t.Errorf("Expected EncryptionType to be 'wireguard', got '%s'", cilium.EncryptionType)
 	}

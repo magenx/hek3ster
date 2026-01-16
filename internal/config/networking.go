@@ -61,8 +61,6 @@ func (c *CNI) SetDefaults() {
 type Cilium struct {
 	Enabled               bool   `yaml:"enabled,omitempty"`
 	Version               string `yaml:"version,omitempty"`               // Cilium version for CLI installation
-	HelmChartVersion      string `yaml:"helm_chart_version,omitempty"`      // Deprecated: use Version instead
-	HelmValuesPath        string `yaml:"helm_values_path,omitempty"`        // Deprecated: no longer used with CLI
 	EncryptionType        string `yaml:"encryption_type,omitempty"`        // wireguard or ipsec
 	RoutingMode           string `yaml:"routing_mode,omitempty"`           // tunnel or native
 	TunnelProtocol        string `yaml:"tunnel_protocol,omitempty"`        // vxlan or geneve
@@ -80,18 +78,9 @@ type Cilium struct {
 
 // SetDefaults sets default values for Cilium
 func (c *Cilium) SetDefaults() {
-	// Set default version (primary field)
+	// Set default version
 	if c.Version == "" {
-		// For backwards compatibility, check HelmChartVersion
-		if c.HelmChartVersion != "" {
-			c.Version = c.HelmChartVersion
-		} else {
-			c.Version = DefaultCiliumVersion
-		}
-	}
-	// Keep HelmChartVersion in sync for backwards compatibility
-	if c.HelmChartVersion == "" {
-		c.HelmChartVersion = c.Version
+		c.Version = DefaultCiliumVersion
 	}
 	if c.EncryptionType == "" {
 		c.EncryptionType = "wireguard"
