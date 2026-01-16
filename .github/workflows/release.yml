@@ -50,6 +50,7 @@ jobs:
           manifest-file: ${{ env.PRERELEASE_MANIFEST }}
 
       - name: Dispatch Build Workflow
+        if: ${{ steps.pre-release.outputs.releases_created == 'true' }}
         run: |
           curl -X POST \
             -H "Authorization: token ${{ secrets.HEK3STER_TOKEN }}" \
@@ -92,6 +93,7 @@ jobs:
           manifest-file: ${{ env.RELEASE_MANIFEST }}
 
       - name: Dispatch Build Workflow
+        if: ${{ steps.release.outputs.releases_created == 'true' }}
         run: |
           curl -X POST \
             -H "Authorization: token ${{ secrets.HEK3STER_TOKEN }}" \
