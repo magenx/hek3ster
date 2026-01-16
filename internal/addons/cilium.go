@@ -3,6 +3,7 @@ package addons
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/magenx/hek3ster/internal/config"
@@ -121,9 +122,11 @@ func (c *CiliumInstaller) installCiliumCLI() error {
 			args = append(args, "--set", "hubble.ui.enabled=true")
 		}
 
-		// Configure Hubble metrics - use enabledList for string values
-		if ciliumConfig.HubbleMetrics != "" {
-			args = append(args, "--set", fmt.Sprintf("hubble.metrics.enabledList=%s", ciliumConfig.HubbleMetrics))
+		// Configure Hubble metrics - use enabledList with array format
+		if len(ciliumConfig.HubbleMetrics) > 0 {
+			// Convert metrics array to comma-separated string format for Helm
+			metricsStr := "{" + strings.Join(ciliumConfig.HubbleMetrics, ",") + "}"
+			args = append(args, "--set", fmt.Sprintf("hubble.metrics.enabledList=%s", metricsStr))
 		}
 	}
 
