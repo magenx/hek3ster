@@ -14,6 +14,7 @@ import (
 type ToolInstaller struct {
 	kubectlVersion string
 	helmVersion    string
+	ciliumVersion  string
 }
 
 // NewToolInstaller creates a new tool installer with versions
@@ -26,6 +27,7 @@ func NewToolInstaller(k3sVersion string) (*ToolInstaller, error) {
 	return &ToolInstaller{
 		kubectlVersion: kubectlVersion,
 		helmVersion:    "", // Helm version determined by get-helm script
+		ciliumVersion:  "", // Cilium CLI version determined by stable.txt
 	}, nil
 }
 
@@ -57,6 +59,11 @@ func (t *ToolInstaller) SetHelmVersion(version string) {
 	t.helmVersion = version
 }
 
+// SetCiliumVersion allows setting a custom cilium CLI version
+func (t *ToolInstaller) SetCiliumVersion(version string) {
+	t.ciliumVersion = version
+}
+
 // GetKubectlVersion returns the kubectl version that will be installed
 func (t *ToolInstaller) GetKubectlVersion() string {
 	return t.kubectlVersion
@@ -65,6 +72,11 @@ func (t *ToolInstaller) GetKubectlVersion() string {
 // GetHelmVersion returns the helm version that will be installed
 func (t *ToolInstaller) GetHelmVersion() string {
 	return t.helmVersion
+}
+
+// GetCiliumVersion returns the cilium CLI version that will be installed
+func (t *ToolInstaller) GetCiliumVersion() string {
+	return t.ciliumVersion
 }
 
 // IsKubectlInstalled checks if kubectl is available
@@ -82,6 +94,12 @@ func (t *ToolInstaller) IsHelmInstalled() bool {
 // IsKubectlAIInstalled checks if kubectl-ai is available
 func (t *ToolInstaller) IsKubectlAIInstalled() bool {
 	_, err := exec.LookPath("kubectl-ai")
+	return err == nil
+}
+
+// IsCiliumInstalled checks if cilium CLI is available
+func (t *ToolInstaller) IsCiliumInstalled() bool {
+	_, err := exec.LookPath("cilium")
 	return err == nil
 }
 
@@ -237,7 +255,85 @@ func (t *ToolInstaller) InstallKubectlAI() error {
 	return nil
 }
 
-// EnsureToolsInstalled checks and installs kubectl, helm, and kubectl-ai if needed
+// InstallCilium installs cilium CLI globally using the official installation method
+// The installation automatically detects OS and architecture
+func (t *ToolInstaller) InstallCilium() error {
+	fmt.Println("Installing cilium CLI globally")
+
+	osName := runtime.GOOS
+	if osName != "linux" && osName != "darwin" {
+		return fmt.Errorf("unsupported operating system: %s", osName)
+	}
+
+	// Validate architecture (supported: amd64, arm64)
+	arch := runtime.GOARCH
+	if arch != "amd64" && arch != "arm64" {
+		return fmt.Errorf("unsupported architecture: %s", arch)
+	}
+
+	fmt.Println("Determining latest cilium CLI version")
+
+	// Get the stable version from cilium-cli repository
+	var ciliumVersion string
+	if t.ciliumVersion != "" {
+		ciliumVersion = t.ciliumVersion
+	} else {
+		// Fetch stable version from GitHub
+		versionURL := "https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt"
+		cmd := exec.Command("curl", "-s", versionURL)
+		output, err := cmd.Output()
+		if err != nil {
+			return fmt.Errorf("failed to fetch cilium CLI version: %w", err)
+		}
+		ciliumVersion = strings.TrimSpace(string(output))
+	}
+
+	fmt.Printf("Downloading cilium CLI %s for %s/%s...\n", ciliumVersion, osName, arch)
+
+	// Build download URL
+	tarballName := fmt.Sprintf("cilium-%s-%s.tar.gz", osName, arch)
+	checksumName := fmt.Sprintf("%s.sha256sum", tarballName)
+	baseURL := fmt.Sprintf("https://github.com/cilium/cilium-cli/releases/download/%s", ciliumVersion)
+
+	// Download tarball
+	if err := t.runCommand("curl", "-L", "--fail", "--remote-name-all", 
+		fmt.Sprintf("%s/%s", baseURL, tarballName),
+		fmt.Sprintf("%s/%s", baseURL, checksumName)); err != nil {
+		return fmt.Errorf("failed to download cilium CLI: %w", err)
+	}
+
+	// Verify checksum
+	fmt.Println("Verifying cilium CLI checksum")
+	cmd := exec.Command("sha256sum", "--check", checksumName)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		// Clean up downloaded files
+		os.Remove(tarballName)
+		os.Remove(checksumName)
+		return fmt.Errorf("cilium CLI checksum verification failed: %w\nOutput: %s", err, string(output))
+	}
+
+	// Extract and install
+	if err := t.runCommand("sudo", "tar", "xzvf", tarballName, "-C", "/usr/local/bin"); err != nil {
+		os.Remove(tarballName)
+		os.Remove(checksumName)
+		return fmt.Errorf("failed to extract cilium CLI: %w", err)
+	}
+
+	// Clean up downloaded files
+	os.Remove(tarballName)
+	os.Remove(checksumName)
+
+	fmt.Println("✓ cilium CLI installed successfully to /usr/local/bin/cilium")
+	return nil
+}
+
+// EnsureToolsInstalled checks and installs kubectl, helm, kubectl-ai, and cilium CLI if needed
+// Tools are installed in the following order:
+// 1. kubectl - Kubernetes command-line tool
+// 2. helm - Kubernetes package manager
+// 3. kubectl-ai - AI-powered kubectl assistant
+// 4. cilium - Cilium CNI CLI tool
 func (t *ToolInstaller) EnsureToolsInstalled() error {
 	var errors []string
 
@@ -263,6 +359,14 @@ func (t *ToolInstaller) EnsureToolsInstalled() error {
 		}
 	} else {
 		fmt.Println("✓ kubectl-ai is already installed")
+	}
+
+	if !t.IsCiliumInstalled() {
+		if err := t.InstallCilium(); err != nil {
+			errors = append(errors, fmt.Sprintf("cilium: %v", err))
+		}
+	} else {
+		fmt.Println("✓ cilium CLI is already installed")
 	}
 
 	if len(errors) > 0 {

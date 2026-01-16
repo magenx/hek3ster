@@ -2,38 +2,32 @@ package addons
 
 import (
 	"context"
-	_ "embed"
-	"encoding/json"
 	"fmt"
-	"os"
-	"strings"
-	"text/template"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/magenx/hek3ster/internal/config"
 	"github.com/magenx/hek3ster/internal/util"
 )
 
-//go:embed templates/cilium_values.yaml.tmpl
-var ciliumValuesTemplate string
-
-// CiliumInstaller handles Cilium CNI installation
+// CiliumInstaller handles Cilium CNI installation using Cilium CLI
 type CiliumInstaller struct {
-	Config    *config.Main
-	SSHClient *util.SSH
-	ctx       context.Context
+	Config        *config.Main
+	SSHClient     *util.SSH
+	KubectlClient *util.KubectlClient
+	ctx           context.Context
 }
 
 // NewCiliumInstaller creates a new Cilium installer
 func NewCiliumInstaller(cfg *config.Main, sshClient *util.SSH) *CiliumInstaller {
 	return &CiliumInstaller{
-		Config:    cfg,
-		SSHClient: sshClient,
-		ctx:       context.Background(),
+		Config:        cfg,
+		SSHClient:     sshClient,
+		KubectlClient: util.NewKubectlClient(cfg.KubeconfigPath),
+		ctx:           context.Background(),
 	}
 }
 
-// Install installs Cilium CNI via Helm
+// Install installs Cilium CNI using Cilium CLI
 func (c *CiliumInstaller) Install(firstMaster *hcloud.Server, masterSSHIP string) error {
 	if c.Config.Networking.CNI.Mode != "cilium" {
 		return nil // Not using Cilium, skip installation
@@ -43,29 +37,21 @@ func (c *CiliumInstaller) Install(firstMaster *hcloud.Server, masterSSHIP string
 		return fmt.Errorf("Cilium configuration is missing")
 	}
 
-	// Check if Cilium is already installed by checking helm status
-	checkCmd := "helm status cilium -n kube-system > /dev/null 2>&1"
-	_, err := c.SSHClient.Run(c.ctx, masterSSHIP, c.Config.Networking.SSH.Port, checkCmd, c.Config.Networking.SSH.UseAgent)
-	if err == nil {
-		// Cilium is already installed
+	// Check if Cilium is already installed using cilium CLI
+	if c.isCiliumInstalled() {
 		util.LogInfo("Cilium CNI already installed, skipping installation", "addons")
 		return nil
 	}
 
 	util.LogInfo("Installing Cilium CNI", "cilium")
 
-	// Step 1: Add Cilium Helm repository
-	if err := c.addHelmRepo(masterSSHIP); err != nil {
-		return fmt.Errorf("failed to add Cilium Helm repository: %w", err)
-	}
-
-	// Step 2: Install Cilium using Helm
-	if err := c.installCiliumHelm(masterSSHIP); err != nil {
+	// Install Cilium using the cilium CLI with local kubeconfig
+	if err := c.installCiliumCLI(); err != nil {
 		return fmt.Errorf("failed to install Cilium: %w", err)
 	}
 
-	// Step 3: Wait for Cilium to be ready
-	if err := c.waitForCiliumReady(masterSSHIP); err != nil {
+	// Wait for Cilium to be ready
+	if err := c.waitForCiliumReady(); err != nil {
 		return fmt.Errorf("failed to verify Cilium status: %w", err)
 	}
 
@@ -73,210 +59,139 @@ func (c *CiliumInstaller) Install(firstMaster *hcloud.Server, masterSSHIP string
 	return nil
 }
 
-// addHelmRepo adds the Cilium Helm repository
-func (c *CiliumInstaller) addHelmRepo(masterSSHIP string) error {
-	cmd := "helm repo add cilium https://helm.cilium.io/"
-	_, err := c.SSHClient.Run(c.ctx, masterSSHIP, c.Config.Networking.SSH.Port, cmd, c.Config.Networking.SSH.UseAgent)
-	if err != nil {
-		// Repo might already exist, try updating
-		updateCmd := "helm repo update"
-		_, updateErr := c.SSHClient.Run(c.ctx, masterSSHIP, c.Config.Networking.SSH.Port, updateCmd, c.Config.Networking.SSH.UseAgent)
-		if updateErr != nil {
-			return fmt.Errorf("failed to add or update Helm repository: %w", err)
-		}
-	}
-	return nil
+// isCiliumInstalled checks if Cilium is already installed
+func (c *CiliumInstaller) isCiliumInstalled() bool {
+	// Check if Cilium daemonset exists in kube-system namespace
+	return c.KubectlClient.ResourceExists("daemonset", "cilium", "kube-system")
 }
 
-// installCiliumHelm installs Cilium using Helm
-func (c *CiliumInstaller) installCiliumHelm(masterSSHIP string) error {
-	ciliumConfig := c.Config.Networking.CNI.Cilium
-
-	// Check if custom Helm values file is provided
-	if ciliumConfig.HelmValuesPath != "" {
-		// Use custom values file
-		return c.installWithCustomValues(masterSSHIP, ciliumConfig.HelmValuesPath)
-	}
-
-	// Generate values from template
-	return c.installWithGeneratedValues(masterSSHIP)
-}
-
-// installWithCustomValues installs Cilium with a custom values file
-func (c *CiliumInstaller) installWithCustomValues(masterSSHIP, valuesPath string) error {
-	ciliumConfig := c.Config.Networking.CNI.Cilium
-
-	// Read custom values file
-	if !util.FileExists(valuesPath) {
-		return fmt.Errorf("custom Helm values file not found: %s", valuesPath)
-	}
-
-	valuesContent, err := os.ReadFile(valuesPath)
-	if err != nil {
-		return fmt.Errorf("failed to read custom values file: %w", err)
-	}
-
-	// Sanitize version to prevent command injection
-	version := sanitizeVersion(ciliumConfig.HelmChartVersion)
-
-	// Upload values file to master node
-	remoteValuesPath := "/tmp/cilium_values.yaml"
-	uploadCmd := fmt.Sprintf("cat > %s <<'EOF'\n%s\nEOF", remoteValuesPath, string(valuesContent))
-	_, err = c.SSHClient.Run(c.ctx, masterSSHIP, c.Config.Networking.SSH.Port, uploadCmd, c.Config.Networking.SSH.UseAgent)
-	if err != nil {
-		return fmt.Errorf("failed to upload values file: %w", err)
-	}
-
-	// Install Cilium with custom values - remote path is safe since it's hardcoded
-	installCmd := fmt.Sprintf(
-		"helm upgrade --install --version %s --namespace kube-system --values %s cilium cilium/cilium",
-		version,
-		remoteValuesPath,
-	)
-
-	_, err = c.SSHClient.Run(c.ctx, masterSSHIP, c.Config.Networking.SSH.Port, installCmd, c.Config.Networking.SSH.UseAgent)
-	if err != nil {
-		return fmt.Errorf("helm install failed: %w", err)
-	}
-
-	// Clean up temporary file
-	cleanupCmd := fmt.Sprintf("rm -f %s", remoteValuesPath)
-	_, _ = c.SSHClient.Run(c.ctx, masterSSHIP, c.Config.Networking.SSH.Port, cleanupCmd, c.Config.Networking.SSH.UseAgent)
-
-	return nil
-}
-
-// sanitizeVersion sanitizes version string to prevent command injection
-func sanitizeVersion(version string) string {
-	// Remove any potentially dangerous characters, allow only alphanumeric, dots, and dashes
-	version = strings.TrimSpace(version)
-	var result strings.Builder
-	for _, r := range version {
-		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '.' || r == '-' || r == 'v' {
-			result.WriteRune(r)
-		}
-	}
-	return result.String()
-}
-
-// installWithGeneratedValues installs Cilium with generated values from template
-func (c *CiliumInstaller) installWithGeneratedValues(masterSSHIP string) error {
-	ciliumConfig := c.Config.Networking.CNI.Cilium
-
-	// Generate Helm values from template
-	valuesContent, err := c.generateHelmValues()
-	if err != nil {
-		return fmt.Errorf("failed to generate Helm values: %w", err)
-	}
-
-	// Upload generated values to master node
-	remoteValuesPath := "/tmp/cilium_values.yaml"
-	uploadCmd := fmt.Sprintf("cat > %s <<'EOF'\n%s\nEOF", remoteValuesPath, valuesContent)
-	_, err = c.SSHClient.Run(c.ctx, masterSSHIP, c.Config.Networking.SSH.Port, uploadCmd, c.Config.Networking.SSH.UseAgent)
-	if err != nil {
-		return fmt.Errorf("failed to upload generated values: %w", err)
-	}
-
-	// Sanitize version to prevent command injection
-	version := sanitizeVersion(ciliumConfig.HelmChartVersion)
-
-	// Install Cilium with generated values - remote path is safe since it's hardcoded
-	installCmd := fmt.Sprintf(
-		"helm upgrade --install --version %s --namespace kube-system --values %s cilium cilium/cilium",
-		version,
-		remoteValuesPath,
-	)
-
-	_, err = c.SSHClient.Run(c.ctx, masterSSHIP, c.Config.Networking.SSH.Port, installCmd, c.Config.Networking.SSH.UseAgent)
-	if err != nil {
-		return fmt.Errorf("helm install failed: %w", err)
-	}
-
-	// Clean up temporary file
-	cleanupCmd := fmt.Sprintf("rm -f %s", remoteValuesPath)
-	_, _ = c.SSHClient.Run(c.ctx, masterSSHIP, c.Config.Networking.SSH.Port, cleanupCmd, c.Config.Networking.SSH.UseAgent)
-
-	return nil
-}
-
-// generateHelmValues generates Helm values from template
-func (c *CiliumInstaller) generateHelmValues() (string, error) {
+// installCiliumCLI installs Cilium using the cilium CLI tool
+func (c *CiliumInstaller) installCiliumCLI() error {
 	ciliumConfig := c.Config.Networking.CNI.Cilium
 
 	// Ensure defaults are set
 	ciliumConfig.SetDefaults()
 
-	// Determine encryption enabled - Cilium has its own encryption settings
-	// Enable encryption if EncryptionType is configured
-	encryptionEnabled := ciliumConfig.EncryptionType != ""
-
-	// Build Hubble metrics array
-	hubbleMetrics := c.buildHubbleMetrics(ciliumConfig.HubbleMetrics)
-
-	// Safe dereferencing of pointers with defaults
-	hubbleEnabled := ciliumConfig.HubbleEnabled != nil && *ciliumConfig.HubbleEnabled
-	hubbleRelayEnabled := ciliumConfig.HubbleRelayEnabled != nil && *ciliumConfig.HubbleRelayEnabled
-	hubbleUIEnabled := ciliumConfig.HubbleUIEnabled != nil && *ciliumConfig.HubbleUIEnabled
-
-	// Prepare template data
-	data := map[string]interface{}{
-		"encryption_enabled":      encryptionEnabled,
-		"encryption_type":         ciliumConfig.EncryptionType,
-		"routing_mode":            ciliumConfig.RoutingMode,
-		"tunnel_protocol":         ciliumConfig.TunnelProtocol,
-		"hubble_enabled":          hubbleEnabled,
-		"hubble_metrics_enabled":  len(hubbleMetrics) > 0,
-		"hubble_metrics":          hubbleMetrics,
-		"hubble_relay_enabled":    hubbleRelayEnabled,
-		"hubble_ui_enabled":       hubbleUIEnabled,
-		"k8s_service_host":        ciliumConfig.K8sServiceHost,
-		"k8s_service_port":        ciliumConfig.K8sServicePort,
-		"operator_replicas":       ciliumConfig.OperatorReplicas,
-		"operator_memory_request": ciliumConfig.OperatorMemoryRequest,
-		"agent_memory_request":    ciliumConfig.AgentMemoryRequest,
-		"egress_gateway_enabled":  ciliumConfig.EgressGatewayEnabled,
+	// Build the cilium install command with all configuration parameters
+	args := []string{
+		"install",
 	}
 
-	// Parse and execute template
-	tmpl, err := template.New("cilium_values").Parse(ciliumValuesTemplate)
-	if err != nil {
-		return "", fmt.Errorf("failed to parse template: %w", err)
+	// Add version if specified (use Version field, not HelmChartVersion)
+	if ciliumConfig.Version != "" {
+		args = append(args, "--version", ciliumConfig.Version)
 	}
 
-	var result strings.Builder
-	if err := tmpl.Execute(&result, data); err != nil {
-		return "", fmt.Errorf("failed to execute template: %w", err)
+	// Set IPAM operator cluster pool IPv4 CIDR
+	if c.Config.Networking.ClusterCIDR != "" {
+		args = append(args, "--set", fmt.Sprintf("ipam.operator.clusterPoolIPv4PodCIDRList=%s", c.Config.Networking.ClusterCIDR))
 	}
 
-	return result.String(), nil
+	// Configure encryption
+	if ciliumConfig.EncryptionType != "" {
+		switch ciliumConfig.EncryptionType {
+		case "wireguard":
+			args = append(args, "--set", "encryption.enabled=true")
+			args = append(args, "--set", "encryption.type=wireguard")
+		case "ipsec":
+			args = append(args, "--set", "encryption.enabled=true")
+			args = append(args, "--set", "encryption.type=ipsec")
+		}
+	}
+
+	// Configure routing mode
+	if ciliumConfig.RoutingMode != "" {
+		args = append(args, "--set", fmt.Sprintf("routingMode=%s", ciliumConfig.RoutingMode))
+	}
+
+	// Configure tunnel protocol
+	if ciliumConfig.TunnelProtocol != "" {
+		args = append(args, "--set", fmt.Sprintf("tunnelProtocol=%s", ciliumConfig.TunnelProtocol))
+	}
+
+	// Configure Hubble
+	if ciliumConfig.HubbleEnabled != nil && *ciliumConfig.HubbleEnabled {
+		args = append(args, "--set", "hubble.enabled=true")
+
+		if ciliumConfig.HubbleRelayEnabled != nil && *ciliumConfig.HubbleRelayEnabled {
+			args = append(args, "--set", "hubble.relay.enabled=true")
+		}
+
+		if ciliumConfig.HubbleUIEnabled != nil && *ciliumConfig.HubbleUIEnabled {
+			args = append(args, "--set", "hubble.ui.enabled=true")
+		}
+
+		// Configure Hubble metrics - use enabledList for string values
+		if ciliumConfig.HubbleMetrics != "" {
+			args = append(args, "--set", fmt.Sprintf("hubble.metrics.enabledList=%s", ciliumConfig.HubbleMetrics))
+		}
+	}
+
+	// Configure K8s API server endpoint
+	if ciliumConfig.K8sServiceHost != "" {
+		args = append(args, "--set", fmt.Sprintf("k8sServiceHost=%s", ciliumConfig.K8sServiceHost))
+	}
+	if ciliumConfig.K8sServicePort != 0 {
+		args = append(args, "--set", fmt.Sprintf("k8sServicePort=%d", ciliumConfig.K8sServicePort))
+	}
+
+	// Configure operator replicas
+	if ciliumConfig.OperatorReplicas != 0 {
+		args = append(args, "--set", fmt.Sprintf("operator.replicas=%d", ciliumConfig.OperatorReplicas))
+	}
+
+	// Configure resource requests
+	if ciliumConfig.OperatorMemoryRequest != "" {
+		args = append(args, "--set", fmt.Sprintf("operator.resources.requests.memory=%s", ciliumConfig.OperatorMemoryRequest))
+	}
+	if ciliumConfig.AgentMemoryRequest != "" {
+		args = append(args, "--set", fmt.Sprintf("resources.requests.memory=%s", ciliumConfig.AgentMemoryRequest))
+	}
+
+	// Configure egress gateway
+	if ciliumConfig.EgressGatewayEnabled {
+		args = append(args, "--set", "egressGateway.enabled=true")
+	}
+
+	// Set kubeconfig explicitly
+	args = append(args, "--kubeconfig", c.Config.KubeconfigPath)
+
+	// Execute cilium install command
+	shell := util.NewShell()
+	result := shell.Run("cilium", args...)
+
+	if result.Error != nil {
+		errMsg := fmt.Sprintf("cilium install failed: %v", result.Error)
+		if result.Stderr != "" {
+			errMsg += fmt.Sprintf("\nStderr: %s", result.Stderr)
+		}
+		return fmt.Errorf("%s", errMsg)
+	}
+
+	util.LogInfo("Cilium installation command completed", "cilium")
+	if result.Stdout != "" {
+		util.LogInfo(result.Stdout, "cilium")
+	}
+
+	return nil
 }
 
-// buildHubbleMetrics builds Hubble metrics array from slice
-func (c *CiliumInstaller) buildHubbleMetrics(customMetrics []string) string {
-	var metrics []string
-	if len(customMetrics) > 0 {
-		// Use custom metrics
-		metrics = customMetrics
-	} else {
-		// Default metrics
-		metrics = []string{"dns", "drop", "tcp", "flow", "port-distribution", "icmp", "http"}
+// waitForCiliumReady waits for Cilium to be ready using cilium CLI
+func (c *CiliumInstaller) waitForCiliumReady() error {
+	util.LogInfo("Waiting for Cilium to be ready...", "cilium")
+
+	// Use cilium status --wait to wait for Cilium to be ready
+	shell := util.NewShell()
+	result := shell.Run("cilium", "status", "--wait", "--kubeconfig", c.Config.KubeconfigPath)
+
+	if result.Error != nil {
+		errMsg := fmt.Sprintf("Cilium status check failed: %v", result.Error)
+		if result.Stderr != "" {
+			errMsg += fmt.Sprintf("\nStderr: %s", result.Stderr)
+		}
+		return fmt.Errorf("%s", errMsg)
 	}
 
-	// Serialize to JSON format
-	jsonBytes, err := json.Marshal(metrics)
-	if err != nil {
-		// Fallback to default if serialization fails
-		return `["dns", "drop", "tcp", "flow", "port-distribution", "icmp", "http"]`
-	}
-	return string(jsonBytes)
-}
-
-// waitForCiliumReady waits for Cilium to be ready
-func (c *CiliumInstaller) waitForCiliumReady(masterSSHIP string) error {
-	checkCmd := "kubectl -n kube-system rollout status ds cilium --timeout=300s"
-	_, err := c.SSHClient.Run(c.ctx, masterSSHIP, c.Config.Networking.SSH.Port, checkCmd, c.Config.Networking.SSH.UseAgent)
-	if err != nil {
-		return fmt.Errorf("Cilium rollout check failed: %w", err)
-	}
+	util.LogSuccess("Cilium is ready", "cilium")
 	return nil
 }
