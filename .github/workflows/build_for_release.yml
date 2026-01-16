@@ -14,6 +14,7 @@ concurrency:
 
 jobs:
   build-release:
+    if: ${{ github.event.release.draft == true }}
     name: Build Go Binary - ${{ matrix.os }}-${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -48,7 +49,6 @@ jobs:
           cache: true
 
       - name: Run all tests
-        if: "${{ github.event.release.prerelease == true }}"
         id: test
         env:
           CGO_ENABLED: 1
