@@ -154,7 +154,31 @@ func (d *Deleter) Run() error {
 		}
 	}
 
-	// Step 3: Delete network (after servers and load balancers that might be using it)
+	// Step 3: Delete DNS zone (if it was created)
+	if d.Config.DNSZone.Enabled && d.Config.Domain != "" {
+		util.LogInfo("Finding and deleting DNS zone", "dns")
+		zoneName := d.Config.Domain
+		if d.Config.DNSZone.Name != "" {
+			zoneName = d.Config.DNSZone.Name
+		}
+		zone, err := d.HetznerClient.GetZone(d.ctx, zoneName)
+		if err == nil && zone != nil {
+			// Check if zone is managed by this cluster
+			if zone.Labels["cluster"] == d.Config.ClusterName && zone.Labels["managed"] == "hek3ster" {
+				if err := d.HetznerClient.DeleteZone(d.ctx, zone); err != nil {
+					errMsg := fmt.Sprintf("Failed to delete DNS zone: %v", err)
+					util.LogError(errMsg, "dns")
+					deletionErrors = append(deletionErrors, errMsg)
+				} else {
+					util.LogSuccess("DNS zone deleted", "dns")
+				}
+			} else {
+				util.LogInfo("DNS zone exists but is not managed by this cluster, skipping deletion", "dns")
+			}
+		}
+	}
+
+	// Step 4: Delete network (after servers and load balancers that might be using it)
 	if d.Config.Networking.PrivateNetwork.Enabled {
 		util.LogInfo("Finding and deleting network", "network")
 		// Use cluster name as network name (matching creation logic)
@@ -171,7 +195,7 @@ func (d *Deleter) Run() error {
 		}
 	}
 
-	// Step 4: Delete firewalls (after all other resources, before SSH key)
+	// Step 5: Delete firewalls (after all other resources, before SSH key)
 	// Skip if local firewall is enabled
 	if !d.Config.Networking.PrivateNetwork.Enabled && d.Config.Networking.PublicNetwork.UseLocalFirewall {
 		util.LogInfo("Local firewall was used, skipping Hetzner cloud firewall deletion", "firewall")
@@ -190,7 +214,7 @@ func (d *Deleter) Run() error {
 		}
 	}
 
-	// Step 5: Delete SSH key (last, no dependencies)
+	// Step 6: Delete SSH key (last, no dependencies)
 	util.LogInfo("Finding and deleting SSH key", "ssh key")
 	keyName := fmt.Sprintf("%s-ssh-key", d.Config.ClusterName)
 	sshKey, err := d.HetznerClient.GetSSHKey(d.ctx, keyName)

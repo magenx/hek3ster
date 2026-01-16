@@ -28,12 +28,14 @@ func NewValidator(config *Main) *Validator {
 func (v *Validator) Validate() error {
 	v.validateClusterName()
 	v.validateK3sVersion()
+	v.validateDomain()
 	v.validateSSHKeys()
 	v.validateNetworking()
 	v.validateMasterPool()
 	v.validateWorkerPools()
 	v.validateDatastore()
 	v.validateLoadBalancer()
+	v.validateDNSZone()
 	v.validateExternalTools()
 
 	if len(v.errors) > 0 {
@@ -438,6 +440,57 @@ func (v *Validator) validateExternalTools() {
 	// by the tool installer before cluster operations, so we don't need to
 	// treat missing tools as errors here. This method is kept for potential
 	// future validation needs.
+}
+
+// validateDomain validates the domain format
+func (v *Validator) validateDomain() {
+	if v.config.Domain == "" {
+		// Domain is optional, no error if not set
+		return
+	}
+
+	// Domain should be a valid DNS name
+	// Allow domains like example.com, subdomain.example.com, etc.
+	validDomain := regexp.MustCompile(`^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$`)
+	if !validDomain.MatchString(v.config.Domain) {
+		v.errors = append(v.errors,
+			"domain must be a valid DNS name (e.g., example.com, subdomain.example.com)")
+	}
+
+	if len(v.config.Domain) > 253 {
+		v.errors = append(v.errors, "domain must be 253 characters or less")
+	}
+}
+
+// validateDNSZone validates DNS zone configuration
+func (v *Validator) validateDNSZone() {
+	if !v.config.DNSZone.Enabled {
+		// DNS zone is disabled, no validation needed
+		return
+	}
+
+	// If DNS zone is enabled, domain must be set
+	if v.config.Domain == "" {
+		v.errors = append(v.errors,
+			"domain is required when dns_zone.enabled is true")
+	}
+
+	// If DNS zone is enabled, global load balancer should be enabled
+	if !v.config.LoadBalancer.Enabled {
+		v.warnings = append(v.warnings,
+			"dns_zone is enabled but load_balancer is not enabled. DNS records will not be created.")
+	}
+
+	// Validate TTL
+	if v.config.DNSZone.TTL < 60 {
+		v.errors = append(v.errors,
+			"dns_zone.ttl must be at least 60 seconds")
+	}
+
+	if v.config.DNSZone.TTL > 86400 {
+		v.warnings = append(v.warnings,
+			"dns_zone.ttl is very high (>24 hours), consider using a lower value for faster DNS propagation")
+	}
 }
 
 // GetErrors returns validation errors
