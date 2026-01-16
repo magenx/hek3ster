@@ -49,25 +49,6 @@ jobs:
           config-file: ${{ env.PRERELEASE_CONFIG }}
           manifest-file: ${{ env.PRERELEASE_MANIFEST }}
 
-      - name: Dispatch Build Workflow
-        if: ${{ steps.pre-release.outputs.releases_created == 'true' }}
-        run: |
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.HEK3STER_TOKEN }}" \
-            -H "Accept: application/vnd.github.everest-preview+json" \
-            https://api.github.com/repos/${{ github.repository }}/dispatches \
-            -d '{
-              "event_type": "build_for_release",
-              "client_payload": {
-                "releases_created": "${{ steps.pre-release.outputs.releases_created }}",
-                "tag_name": "${{ steps.pre-release.outputs.tag_name }}",
-                "prs_created": "${{ steps.pre-release.outputs.prs_created }}",
-                "upload_url": "${{ steps.pre-release.outputs.upload_url }}",
-                "version": "${{ steps.pre-release.outputs.version }}",
-                "sha": "${{ steps.pre-release.outputs.sha }}"
-              }
-            }'
-
   release:
     name: Publish pre-release then release PR
     if: ${{ needs.pre-release.outputs.releases_created == 'true' && contains(needs.pre-release.outputs.tag_name, vars.PRERELEASE_TYPE) }}
@@ -90,22 +71,3 @@ jobs:
           token: ${{ secrets.HEK3STER_TOKEN }}
           config-file: ${{ env.RELEASE_CONFIG }}
           manifest-file: ${{ env.RELEASE_MANIFEST }}
-
-      - name: Dispatch Build Workflow
-        if: ${{ steps.release.outputs.releases_created == 'true' }}
-        run: |
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.HEK3STER_TOKEN }}" \
-            -H "Accept: application/vnd.github.everest-preview+json" \
-            https://api.github.com/repos/${{ github.repository }}/dispatches \
-            -d '{
-              "event_type": "build_for_release",
-              "client_payload": {
-                "releases_created": "${{ steps.release.outputs.releases_created }}",
-                "tag_name": "${{ steps.release.outputs.tag_name }}",
-                "prs_created": "${{ steps.release.outputs.prs_created }}",
-                "upload_url": "${{ steps.release.outputs.upload_url }}",
-                "version": "${{ steps.release.outputs.version }}",
-                "sha": "${{ steps.release.outputs.sha }}"
-              }
-            }'
