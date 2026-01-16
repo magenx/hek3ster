@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.2-alpha.7](https://github.com/magenx/hek3ster/compare/v1.0.2-alpha.6...v1.0.2-alpha.7) (2026-01-16)
+
+
+### 🚦 Maintenance
+
+* Add comment placeholder in init function ([#151](https://github.com/magenx/hek3ster/issues/151)) ([47265ea](https://github.com/magenx/hek3ster/commit/47265ea805f62f5f1bdc809267442dc8d254b04b))
+* Remove build workflow dispatch steps ([#149](https://github.com/magenx/hek3ster/issues/149)) ([840c9c8](https://github.com/magenx/hek3ster/commit/840c9c868be4c73681c4ba12ef0979f0c3ad3720))
+* Remove draft from release config ([#150](https://github.com/magenx/hek3ster/issues/150)) ([7add6b1](https://github.com/magenx/hek3ster/commit/7add6b109cac9d667a2b3594bfa6d8e3c519b5f3))
+* Update GitHub Actions to trigger on release events ([#148](https://github.com/magenx/hek3ster/issues/148)) ([bccc8df](https://github.com/magenx/hek3ster/commit/bccc8dfb163bac035594617ca3213ab5694eafc5))
+
 ## [1.0.2-alpha.6](https://github.com/magenx/hek3ster/compare/v1.0.2-alpha.5...v1.0.2-alpha.6) (2026-01-16)
 
 
