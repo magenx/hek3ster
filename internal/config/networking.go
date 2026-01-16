@@ -3,7 +3,7 @@ package config
 // Default version constants
 const (
 	// DefaultCiliumVersion is the default Cilium version to install
-	DefaultCiliumVersion = "1.17.2"
+	DefaultCiliumVersion = "1.18.6"
 )
 
 // Networking represents networking configuration
