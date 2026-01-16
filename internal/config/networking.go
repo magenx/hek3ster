@@ -1,5 +1,11 @@
 package config
 
+// Default version constants
+const (
+	// DefaultCiliumVersion is the default Cilium version to install
+	DefaultCiliumVersion = "1.17.2"
+)
+
 // Networking represents networking configuration
 type Networking struct {
 	CNI             CNI             `yaml:"cni,omitempty"`
@@ -54,12 +60,10 @@ func (c *CNI) SetDefaults() {
 // Cilium represents Cilium CNI configuration
 type Cilium struct {
 	Enabled               bool     `yaml:"enabled,omitempty"`
-	Version               string   `yaml:"version,omitempty"`
-	HelmChartVersion      string   `yaml:"helm_chart_version,omitempty"`
-	HelmValuesPath        string   `yaml:"helm_values_path,omitempty"`
-	EncryptionType        string   `yaml:"encryption_type,omitempty"`
-	RoutingMode           string   `yaml:"routing_mode,omitempty"`
-	TunnelProtocol        string   `yaml:"tunnel_protocol,omitempty"`
+	Version               string   `yaml:"version,omitempty"`         // Cilium version for CLI installation
+	EncryptionType        string   `yaml:"encryption_type,omitempty"` // wireguard or ipsec
+	RoutingMode           string   `yaml:"routing_mode,omitempty"`    // tunnel or native
+	TunnelProtocol        string   `yaml:"tunnel_protocol,omitempty"` // vxlan or geneve
 	HubbleEnabled         *bool    `yaml:"hubble_enabled,omitempty"`
 	HubbleMetrics         []string `yaml:"hubble_metrics,omitempty"`
 	HubbleRelayEnabled    *bool    `yaml:"hubble_relay_enabled,omitempty"`
@@ -74,8 +78,9 @@ type Cilium struct {
 
 // SetDefaults sets default values for Cilium
 func (c *Cilium) SetDefaults() {
-	if c.HelmChartVersion == "" {
-		c.HelmChartVersion = "v1.17.2"
+	// Set default version
+	if c.Version == "" {
+		c.Version = DefaultCiliumVersion
 	}
 	if c.EncryptionType == "" {
 		c.EncryptionType = "wireguard"
