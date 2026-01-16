@@ -1,6 +1,9 @@
 package addons
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/magenx/hek3ster/internal/config"
@@ -74,5 +77,59 @@ func TestCiliumInstaller_DefaultValues(t *testing.T) {
 	}
 	if cilium.AgentMemoryRequest != "512Mi" {
 		t.Errorf("Expected AgentMemoryRequest to be '512Mi', got '%s'", cilium.AgentMemoryRequest)
+	}
+}
+
+func TestCiliumInstaller_PathExpansion(t *testing.T) {
+	// Test that tilde paths are properly expanded
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		t.Fatalf("Failed to get home directory: %v", err)
+	}
+
+	tests := []struct {
+		name         string
+		inputPath    string
+		expectedPath string
+	}{
+		{
+			name:         "tilde path expansion",
+			inputPath:    "~/.kube/config",
+			expectedPath: filepath.Join(homeDir, ".kube/config"),
+		},
+		{
+			name:         "absolute path unchanged",
+			inputPath:    "/etc/rancher/k3s/k3s.yaml",
+			expectedPath: "/etc/rancher/k3s/k3s.yaml",
+		},
+		{
+			name:         "tilde with subdirectory",
+			inputPath:    "~/my-configs/kubeconfig.yaml",
+			expectedPath: filepath.Join(homeDir, "my-configs/kubeconfig.yaml"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			expandedPath, err := config.ExpandPath(tt.inputPath)
+			if err != nil {
+				t.Fatalf("ExpandPath failed: %v", err)
+			}
+
+			// Make the expected path absolute for comparison
+			expectedAbs, err := filepath.Abs(tt.expectedPath)
+			if err != nil {
+				t.Fatalf("Failed to get absolute path: %v", err)
+			}
+
+			if expandedPath != expectedAbs {
+				t.Errorf("ExpandPath(%q) = %q, want %q", tt.inputPath, expandedPath, expectedAbs)
+			}
+
+			// Verify that tilde is not in the expanded path
+			if strings.Contains(expandedPath, "~") {
+				t.Errorf("Expanded path still contains tilde: %q", expandedPath)
+			}
+		})
 	}
 }
