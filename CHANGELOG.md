@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.2-alpha.6](https://github.com/magenx/hek3ster/compare/v1.0.2-alpha.5...v1.0.2-alpha.6) (2026-01-16)
+
+
+### 🚦 Maintenance
+
+* Change prerelease setting to false ([#144](https://github.com/magenx/hek3ster/issues/144)) ([6c2a64f](https://github.com/magenx/hek3ster/commit/6c2a64f23a2f563b7b763dd7f57f1dfd385a4627))
+* Remove unnecessary comment in init function ([#145](https://github.com/magenx/hek3ster/issues/145)) ([e5ff4ce](https://github.com/magenx/hek3ster/commit/e5ff4cef76ba28cd064bacf6664ab9c44921c287))
+
 ## [1.0.2-alpha.5](https://github.com/magenx/hek3ster/compare/v1.0.2-alpha.4...v1.0.2-alpha.5) (2026-01-16)
 
 
