@@ -289,6 +289,15 @@ func (c *CreatorEnhanced) Run() error {
 		if err != nil {
 			return fmt.Errorf("failed to create global load balancer: %w", err)
 		}
+
+		// Step 10a: Create DNS zone (if enabled)
+		if c.Config.DNSZone.Enabled && c.Config.Domain != "" {
+			util.LogInfo("Creating DNS zone for domain", "dns")
+			_, err := networkMgr.CreateDNSZone()
+			if err != nil {
+				return fmt.Errorf("failed to create DNS zone: %w", err)
+			}
+		}
 	}
 
 	// Step 11: Retrieve kubeconfig

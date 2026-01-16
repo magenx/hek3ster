@@ -497,3 +497,129 @@ func (c *Client) WaitForServerStatus(ctx context.Context, server *hcloud.Server,
 func (c *Client) GetHCloudClient() *hcloud.Client {
 	return c.hcloud
 }
+
+// GetZone returns a specific DNS zone by name
+func (c *Client) GetZone(ctx context.Context, name string) (*hcloud.Zone, error) {
+	zone, _, err := c.hcloud.Zone.GetByName(ctx, name)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch zone %s: %w", name, err)
+	}
+	return zone, nil
+}
+
+// CreateZone creates a new DNS zone
+func (c *Client) CreateZone(ctx context.Context, opts hcloud.ZoneCreateOpts) (*hcloud.Zone, error) {
+	result, _, err := c.hcloud.Zone.Create(ctx, opts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create zone: %w", err)
+	}
+
+	// Wait for the action to complete if present
+	if result.Action != nil {
+		if err := c.waitForAction(ctx, result.Action); err != nil {
+			return nil, fmt.Errorf("zone creation action failed: %w", err)
+		}
+	}
+
+	return result.Zone, nil
+}
+
+// DeleteZone deletes a DNS zone
+func (c *Client) DeleteZone(ctx context.Context, zone *hcloud.Zone) error {
+	result, _, err := c.hcloud.Zone.Delete(ctx, zone)
+	if err != nil {
+		return fmt.Errorf("failed to delete zone %s: %w", zone.Name, err)
+	}
+
+	// Wait for the action to complete if present
+	if result.Action != nil {
+		if err := c.waitForAction(ctx, result.Action); err != nil {
+			return fmt.Errorf("zone deletion action failed: %w", err)
+		}
+	}
+
+	// Wait for zone to actually be deleted
+	ticker := time.NewTicker(2 * time.Second)
+	defer ticker.Stop()
+
+	timeout := time.NewTimer(2 * time.Minute)
+	defer timeout.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-timeout.C:
+			return fmt.Errorf("timeout waiting for zone %s to be deleted", zone.Name)
+		case <-ticker.C:
+			// Check if zone still exists
+			z, _, err := c.hcloud.Zone.GetByID(ctx, zone.ID)
+			if err != nil {
+				// Only treat 'not found' errors as successful deletion
+				if hcloud.IsError(err, hcloud.ErrorCodeNotFound) {
+					return nil
+				}
+				// For other errors, continue polling
+			}
+			if z == nil {
+				// Zone is deleted
+				return nil
+			}
+		}
+	}
+}
+
+// GetZoneRRSet returns a specific DNS record set by zone and name
+func (c *Client) GetZoneRRSet(ctx context.Context, zone *hcloud.Zone, name string, rrType hcloud.ZoneRRSetType) (*hcloud.ZoneRRSet, error) {
+	// List all RRSets and filter by name and type
+	rrsets, err := c.hcloud.Zone.AllRRSetsWithOpts(ctx, zone, hcloud.ZoneRRSetListOpts{
+		Name: name,
+		Type: []hcloud.ZoneRRSetType{rrType},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to list zone RRSets: %w", err)
+	}
+
+	if len(rrsets) == 0 {
+		return nil, nil
+	}
+
+	// Return the first match. In practice, the combination of zone + name + type
+	// should uniquely identify a single RRSet. If multiple matches exist, this
+	// indicates an unexpected state in the DNS zone configuration.
+	return rrsets[0], nil
+}
+
+// CreateZoneRRSet creates a new DNS record set
+func (c *Client) CreateZoneRRSet(ctx context.Context, zone *hcloud.Zone, opts hcloud.ZoneRRSetCreateOpts) (*hcloud.ZoneRRSet, error) {
+	result, _, err := c.hcloud.Zone.CreateRRSet(ctx, zone, opts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create zone RRSet: %w", err)
+	}
+
+	// Wait for the action to complete if present
+	if result.Action != nil {
+		if err := c.waitForAction(ctx, result.Action); err != nil {
+			return nil, fmt.Errorf("zone RRSet creation action failed: %w", err)
+		}
+	}
+
+	return result.RRSet, nil
+}
+
+// DeleteZoneRRSet deletes a DNS record set
+func (c *Client) DeleteZoneRRSet(ctx context.Context, rrset *hcloud.ZoneRRSet) error {
+	result, _, err := c.hcloud.Zone.DeleteRRSet(ctx, rrset)
+	if err != nil {
+		return fmt.Errorf("failed to delete zone RRSet: %w", err)
+	}
+
+	// Wait for the action to complete if present
+	if result.Action != nil {
+		if err := c.waitForAction(ctx, result.Action); err != nil {
+			return fmt.Errorf("zone RRSet deletion action failed: %w", err)
+		}
+	}
+
+	return nil
+}

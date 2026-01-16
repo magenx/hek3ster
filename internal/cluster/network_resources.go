@@ -442,6 +442,63 @@ func (n *NetworkResourceManager) CreateGlobalLoadBalancer(network *hcloud.Networ
 	return lb, nil
 }
 
+// CreateDNSZone creates a DNS zone in Hetzner for the domain
+func (n *NetworkResourceManager) CreateDNSZone() (*hcloud.Zone, error) {
+	// Skip if DNS zone is not enabled
+	if !n.Config.DNSZone.Enabled {
+		util.LogInfo("DNS zone creation is disabled, skipping", "dns")
+		return nil, nil
+	}
+
+	// Skip if domain is not set
+	if n.Config.Domain == "" {
+		util.LogInfo("Domain is not set, skipping DNS zone creation", "dns")
+		return nil, nil
+	}
+
+	util.LogInfo(fmt.Sprintf("Creating DNS zone for domain: %s", n.Config.Domain), "dns")
+
+	// Determine zone name (use override if provided, otherwise use domain)
+	zoneName := n.Config.Domain
+	if n.Config.DNSZone.Name != "" {
+		zoneName = n.Config.DNSZone.Name
+	}
+
+	// Check if zone already exists
+	existingZone, err := n.HetznerClient.GetZone(n.ctx, zoneName)
+	if err == nil && existingZone != nil {
+		util.LogInfo(fmt.Sprintf("DNS zone already exists: %s", zoneName), "dns")
+		return existingZone, nil
+	}
+
+	// Create DNS zone
+	zone, err := n.HetznerClient.CreateZone(n.ctx, hcloud.ZoneCreateOpts{
+		Name: zoneName,
+		Mode: hcloud.ZoneModePrimary,
+		TTL:  hcloud.Ptr(n.Config.DNSZone.TTL),
+		Labels: map[string]string{
+			"cluster": n.Config.ClusterName,
+			"managed": "hek3ster",
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create DNS zone: %w", err)
+	}
+
+	util.LogSuccess(fmt.Sprintf("DNS zone created: %s", zoneName), "dns")
+
+	// Display nameservers information
+	if len(zone.AuthoritativeNameservers.Assigned) > 0 {
+		util.LogInfo("DNS zone nameservers:", "dns")
+		for _, ns := range zone.AuthoritativeNameservers.Assigned {
+			util.LogInfo(fmt.Sprintf("  - %s", ns), "dns")
+		}
+		util.LogInfo(fmt.Sprintf("Update your domain registrar to use these nameservers for domain: %s", n.Config.Domain), "dns")
+	}
+
+	return zone, nil
+}
+
 // parseCIDR parses a CIDR string and returns net.IPNet
 func parseCIDR(cidr string) net.IPNet {
 	_, ipnet, err := net.ParseCIDR(cidr)
