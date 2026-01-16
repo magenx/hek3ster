@@ -310,13 +310,18 @@ func (n *NetworkResourceManager) CreateGlobalLoadBalancer(network *hcloud.Networ
 		services = append(services, service)
 	}
 
+	// Determine if load balancer should be attached to network
+	// This must be calculated BEFORE determining usePrivateIP
+	shouldAttachToNetwork := n.Config.LoadBalancer.AttachToNetwork && n.Config.Networking.PrivateNetwork.Enabled && network != nil
+
 	// Determine if we should use private IP for targets
+	// Private IPs can only be used if the load balancer is attached to the network
 	usePrivateIP := false
 	if n.Config.LoadBalancer.UsePrivateIP != nil {
-		// If explicitly set, use that value
-		usePrivateIP = *n.Config.LoadBalancer.UsePrivateIP
-	} else if n.Config.Networking.PrivateNetwork.Enabled {
-		// If not explicitly set and private network is enabled, default to true
+		// If explicitly set, use that value (but it must match network attachment)
+		usePrivateIP = *n.Config.LoadBalancer.UsePrivateIP && shouldAttachToNetwork
+	} else if shouldAttachToNetwork {
+		// If not explicitly set and load balancer is attached to network, default to true
 		usePrivateIP = true
 	}
 
@@ -343,9 +348,6 @@ func (n *NetworkResourceManager) CreateGlobalLoadBalancer(network *hcloud.Networ
 		Services:        services,
 		PublicInterface: hcloud.Ptr(true),
 	}
-
-	// Determine if load balancer should be attached to network
-	shouldAttachToNetwork := n.Config.LoadBalancer.AttachToNetwork && n.Config.Networking.PrivateNetwork.Enabled && network != nil
 
 	// Attach to network if configured and private network is enabled
 	if shouldAttachToNetwork {
