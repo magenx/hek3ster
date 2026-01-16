@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.2-alpha.1](https://github.com/magenx/hek3ster/compare/v1.0.2-alpha...v1.0.2-alpha.1) (2026-01-16)
+
+
+### 🐛 Bug Fixes
+
+* **addons:** Fix Cilium CNI installation failure with tilde-prefixed kubeconfig paths ([#117](https://github.com/magenx/hek3ster/issues/117)) ([9f15d14](https://github.com/magenx/hek3ster/commit/9f15d14327b8e9572c2cfcea5f1bf6dc88b9a939))
+* **load balancer:** Fix load balancer network attachment validation for private IP targets ([#120](https://github.com/magenx/hek3ster/issues/120)) ([cf0108b](https://github.com/magenx/hek3ster/commit/cf0108be1732b2a8f1f59ca05c98f9fe5ff8bd73))
+
 ## [1.0.2-alpha](https://github.com/magenx/hek3ster/compare/v1.0.1...v1.0.2-alpha) (2026-01-16)
 
 
