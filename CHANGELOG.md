@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.2-alpha.2](https://github.com/magenx/hek3ster/compare/v1.0.2-alpha.1...v1.0.2-alpha.2) (2026-01-16)
+
+
+### 🚦 Maintenance
+
+* Modify build workflow for draft releases ([#124](https://github.com/magenx/hek3ster/issues/124)) ([6992579](https://github.com/magenx/hek3ster/commit/699257982c3d80d35fe4b544a7675ddd7adf4fb2))
+* **release:** Add draft option to prerelease configuration ([#122](https://github.com/magenx/hek3ster/issues/122)) ([ace11d3](https://github.com/magenx/hek3ster/commit/ace11d3624302d65b46cba16a492abc959adc9a7))
+* Remove commented-out code in init function ([#125](https://github.com/magenx/hek3ster/issues/125)) ([4f781da](https://github.com/magenx/hek3ster/commit/4f781da51a9e40175be08ebea0f0fe2bb24951da))
+
 ## [1.0.2-alpha.1](https://github.com/magenx/hek3ster/compare/v1.0.2-alpha...v1.0.2-alpha.1) (2026-01-16)
 
 
