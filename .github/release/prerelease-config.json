@@ -31,6 +31,7 @@
       "component": "hek3ster",
       "release-type": "simple",
       "prerelease": true,
+      "draft": true,
       "prerelease-type": "alpha",
       "versioning": "prerelease",
       "pull-request-title-pattern": "chore${scope}: hek3ster ${version}",
