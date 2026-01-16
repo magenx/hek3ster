@@ -1,8 +1,19 @@
 package config
 
 import (
+	"strings"
 	"testing"
 )
+
+// containsErrorMessage checks if any error in the slice contains the expected message
+func containsErrorMessage(errors []string, expectedMsg string) bool {
+	for _, err := range errors {
+		if strings.Contains(err, expectedMsg) {
+			return true
+		}
+	}
+	return false
+}
 
 func TestValidateDomain(t *testing.T) {
 	tests := []struct {
@@ -76,15 +87,8 @@ func TestValidateDomain(t *testing.T) {
 				t.Errorf("Expected error: %v, got error: %v (errors: %v)", tt.expectError, hasError, validator.errors)
 			}
 
-			if tt.expectError && len(validator.errors) > 0 {
-				found := false
-				for _, err := range validator.errors {
-					if len(tt.errorMsg) > 0 && len(err) >= len(tt.errorMsg) && err[:len(tt.errorMsg)] == tt.errorMsg {
-						found = true
-						break
-					}
-				}
-				if !found && tt.errorMsg != "" {
+			if tt.expectError && len(validator.errors) > 0 && tt.errorMsg != "" {
+				if !containsErrorMessage(validator.errors, tt.errorMsg) {
 					t.Errorf("Expected error message containing '%s', got: %v", tt.errorMsg, validator.errors)
 				}
 			}
@@ -212,28 +216,14 @@ func TestValidateDNSZone(t *testing.T) {
 				t.Errorf("Expected warning: %v, got warning: %v (warnings: %v)", tt.expectWarn, hasWarn, validator.warnings)
 			}
 
-			if tt.expectError && len(validator.errors) > 0 {
-				found := false
-				for _, err := range validator.errors {
-					if len(tt.errorMsg) > 0 && len(err) >= len(tt.errorMsg) && err[:len(tt.errorMsg)] == tt.errorMsg {
-						found = true
-						break
-					}
-				}
-				if !found && tt.errorMsg != "" {
+			if tt.expectError && len(validator.errors) > 0 && tt.errorMsg != "" {
+				if !containsErrorMessage(validator.errors, tt.errorMsg) {
 					t.Errorf("Expected error message containing '%s', got: %v", tt.errorMsg, validator.errors)
 				}
 			}
 
-			if tt.expectWarn && len(validator.warnings) > 0 {
-				found := false
-				for _, warn := range validator.warnings {
-					if len(tt.warnMsg) > 0 && len(warn) >= len(tt.warnMsg) && warn[:len(tt.warnMsg)] == tt.warnMsg {
-						found = true
-						break
-					}
-				}
-				if !found && tt.warnMsg != "" {
+			if tt.expectWarn && len(validator.warnings) > 0 && tt.warnMsg != "" {
+				if !containsErrorMessage(validator.warnings, tt.warnMsg) {
 					t.Errorf("Expected warning message containing '%s', got: %v", tt.warnMsg, validator.warnings)
 				}
 			}

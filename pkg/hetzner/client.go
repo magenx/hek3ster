@@ -584,6 +584,9 @@ func (c *Client) GetZoneRRSet(ctx context.Context, zone *hcloud.Zone, name strin
 		return nil, nil
 	}
 
+	// Return the first match. In practice, the combination of zone + name + type
+	// should uniquely identify a single RRSet. If multiple matches exist, this
+	// indicates an unexpected state in the DNS zone configuration.
 	return rrsets[0], nil
 }
 
