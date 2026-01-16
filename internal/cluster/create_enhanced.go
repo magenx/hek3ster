@@ -841,9 +841,25 @@ func (c *CreatorEnhanced) createWorkerNodesFromPools(sshKey *hcloud.SSHKey, netw
 
 // waitForNodes waits for nodes to be ready
 func (c *CreatorEnhanced) waitForNodes(servers []*hcloud.Server) error {
+	// Set overall timeout for waiting for all nodes: 15 minutes per node
+	// This allows for server creation (5 min) + SSH ready (2.5 min) + cloud-init (6 min) + buffer
+	overallTimeout := time.Duration(len(servers)) * 15 * time.Minute
+	ctx, cancel := context.WithTimeout(c.ctx, overallTimeout)
+	defer cancel()
+
 	for i, server := range servers {
+		// Check for context cancellation or timeout
+		select {
+		case <-ctx.Done():
+			if ctx.Err() == context.DeadlineExceeded {
+				return fmt.Errorf("timeout waiting for nodes to be ready after %v (processed %d/%d nodes)", overallTimeout, i, len(servers))
+			}
+			return ctx.Err()
+		default:
+		}
+
 		// First, wait for the server to reach "running" status
-		err := c.HetznerClient.WaitForServerStatus(c.ctx, server, hcloud.ServerStatusRunning, 5*60*time.Second)
+		err := c.HetznerClient.WaitForServerStatus(ctx, server, hcloud.ServerStatusRunning, 5*60*time.Second)
 		if err != nil {
 			return fmt.Errorf("server %s failed to start: %w", server.Name, err)
 		}
@@ -851,7 +867,7 @@ func (c *CreatorEnhanced) waitForNodes(servers []*hcloud.Server) error {
 		// CRITICAL: Refresh server data from API to get updated network information
 		// This is essential when private networking is enabled, as the PrivateNet
 		// field may not be populated in the initial server object
-		refreshedServer, err := c.HetznerClient.GetServer(c.ctx, server.Name)
+		refreshedServer, err := c.HetznerClient.GetServer(ctx, server.Name)
 		if err != nil {
 			return fmt.Errorf("failed to refresh server %s: %w", server.Name, err)
 		}
@@ -869,12 +885,12 @@ func (c *CreatorEnhanced) waitForNodes(servers []*hcloud.Server) error {
 			return err
 		}
 
-		err = c.SSHClient.WaitForInstance(c.ctx, ip, c.Config.Networking.SSH.Port, "echo ready", "ready", c.Config.Networking.SSH.UseAgent, 30)
+		err = c.SSHClient.WaitForInstance(ctx, ip, c.Config.Networking.SSH.Port, "echo ready", "ready", c.Config.Networking.SSH.UseAgent, 30)
 		if err != nil {
 			return fmt.Errorf("node %s not ready: %w", server.Name, err)
 		}
 
-		err = c.SSHClient.WaitForCloudInit(c.ctx, ip, c.Config.Networking.SSH.Port, c.Config.Networking.SSH.UseAgent)
+		err = c.SSHClient.WaitForCloudInit(ctx, ip, c.Config.Networking.SSH.Port, c.Config.Networking.SSH.UseAgent)
 		if err != nil {
 			return fmt.Errorf("cloud-init failed on %s: %w", server.Name, err)
 		}
