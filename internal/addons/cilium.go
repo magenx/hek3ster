@@ -73,6 +73,12 @@ func (c *CiliumInstaller) installCiliumCLI() error {
 	// Ensure defaults are set
 	ciliumConfig.SetDefaults()
 
+	// Expand kubeconfig path to handle tilde (~)
+	kubeconfigPath, err := config.ExpandPath(c.Config.KubeconfigPath)
+	if err != nil {
+		return fmt.Errorf("failed to expand kubeconfig path: %w", err)
+	}
+
 	// Build the cilium install command with all configuration parameters
 	args := []string{
 		"install",
@@ -156,8 +162,8 @@ func (c *CiliumInstaller) installCiliumCLI() error {
 		args = append(args, "--set", "egressGateway.enabled=true")
 	}
 
-	// Set kubeconfig explicitly
-	args = append(args, "--kubeconfig", c.Config.KubeconfigPath)
+	// Set kubeconfig explicitly with expanded path
+	args = append(args, "--kubeconfig", kubeconfigPath)
 
 	// Execute cilium install command
 	shell := util.NewShell()
@@ -183,9 +189,15 @@ func (c *CiliumInstaller) installCiliumCLI() error {
 func (c *CiliumInstaller) waitForCiliumReady() error {
 	util.LogInfo("Waiting for Cilium to be ready...", "cilium")
 
+	// Expand kubeconfig path to handle tilde (~)
+	kubeconfigPath, err := config.ExpandPath(c.Config.KubeconfigPath)
+	if err != nil {
+		return fmt.Errorf("failed to expand kubeconfig path: %w", err)
+	}
+
 	// Use cilium status --wait to wait for Cilium to be ready
 	shell := util.NewShell()
-	result := shell.Run("cilium", "status", "--wait", "--kubeconfig", c.Config.KubeconfigPath)
+	result := shell.Run("cilium", "status", "--wait", "--kubeconfig", kubeconfigPath)
 
 	if result.Error != nil {
 		errMsg := fmt.Sprintf("Cilium status check failed: %v", result.Error)
