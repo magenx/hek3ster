@@ -10,14 +10,14 @@ import (
 // This test validates the fix for the "load balancer is not attached to a network" issue
 func TestLoadBalancerPrivateIPLogic(t *testing.T) {
 	tests := []struct {
-		name                      string
-		attachToNetwork           bool
-		privateNetworkEnabled     bool
-		usePrivateIPConfigured    *bool
-		networkProvided           bool
-		expectedUsePrivateIP      bool
-		expectedAttachToNetwork   bool
-		description               string
+		name                    string
+		attachToNetwork         bool
+		privateNetworkEnabled   bool
+		usePrivateIPConfigured  *bool
+		networkProvided         bool
+		expectedUsePrivateIP    bool
+		expectedAttachToNetwork bool
+		description             string
 	}{
 		{
 			name:                    "attach_to_network=true, private_network=true, use_private_ip not set",
