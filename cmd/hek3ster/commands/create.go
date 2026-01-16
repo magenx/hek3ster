@@ -43,7 +43,7 @@ var createCmd = &cobra.Command{
 		}
 
 		// Ensure required tools are installed (using k3s version from config)
-		fmt.Println("\nChecking for required tools (kubectl, helm, kubectl-ai)")
+		fmt.Println("\nChecking for required tools:")
 		installer, err := util.NewToolInstaller(loader.Settings.K3sVersion)
 		if err != nil {
 			return fmt.Errorf("failed to initialize tool installer: %w", err)
