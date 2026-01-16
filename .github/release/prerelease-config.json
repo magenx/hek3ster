@@ -30,7 +30,7 @@
     ".": {
       "component": "hek3ster",
       "release-type": "simple",
-      "prerelease": true,
+      "prerelease": false,
       "draft": true,
       "prerelease-type": "alpha",
       "versioning": "prerelease",
