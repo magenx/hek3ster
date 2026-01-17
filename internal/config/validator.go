@@ -357,10 +357,10 @@ func (v *Validator) validateLoadBalancer() {
 				break
 			}
 		}
-        if !isValidProtocol {
+		if !isValidProtocol {
 			v.errors = append(v.errors, fmt.Sprintf("load_balancer: service %d has invalid protocol '%s', must be one of: %s",
 				i+1, svc.Protocol, strings.Join(validProtocols, ", ")))
-        }
+		}
 
 		// Validate ports
 		if svc.ListenPort < 1 || svc.ListenPort > 65535 {
