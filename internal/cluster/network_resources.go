@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
@@ -252,7 +253,8 @@ func (n *NetworkResourceManager) CreateClusterFirewall(network *hcloud.Network) 
 
 // CreateGlobalLoadBalancer creates a global load balancer for application traffic
 // It attaches to specified worker pools via label selector and configures services
-func (n *NetworkResourceManager) CreateGlobalLoadBalancer(network *hcloud.Network, location string) (*hcloud.LoadBalancer, error) {
+// If SSL certificate is enabled and HTTPS services are configured, it will attach the certificate
+func (n *NetworkResourceManager) CreateGlobalLoadBalancer(network *hcloud.Network, location string, certificate *hcloud.Certificate) (*hcloud.LoadBalancer, error) {
 	// Skip if load balancer is not enabled
 	if !n.Config.LoadBalancer.Enabled {
 		util.LogInfo("Global load balancer is disabled, skipping creation", "load balancer")
@@ -282,6 +284,19 @@ func (n *NetworkResourceManager) CreateGlobalLoadBalancer(network *hcloud.Networ
 			ListenPort:      hcloud.Ptr(svc.ListenPort),
 			DestinationPort: hcloud.Ptr(svc.DestinationPort),
 			Proxyprotocol:   hcloud.Ptr(svc.ProxyProtocol),
+		}
+
+		// Add HTTP configuration for HTTPS services
+		if strings.ToLower(svc.Protocol) == "https" {
+			httpConfig := &hcloud.LoadBalancerCreateOptsServiceHTTP{}
+
+			// Attach certificate if provided
+			if certificate != nil {
+				httpConfig.Certificates = []*hcloud.Certificate{certificate}
+				util.LogInfo(fmt.Sprintf("Attaching SSL certificate to HTTPS service on port %d", svc.ListenPort), "load balancer")
+			}
+
+			service.HTTP = httpConfig
 		}
 
 		// Add health check if configured
@@ -509,4 +524,67 @@ func parseCIDR(cidr string) net.IPNet {
 		util.LogWarning(fmt.Sprintf("Failed to parse CIDR %s, using restrictive default", cidr), "firewall")
 	}
 	return *ipnet
+}
+
+// CreateSSLCertificate creates a managed SSL certificate for the domain
+// The certificate will cover both the root domain and wildcard subdomain
+func (n *NetworkResourceManager) CreateSSLCertificate() (*hcloud.Certificate, error) {
+	// Skip if SSL certificate is not enabled
+	if !n.Config.SSLCertificate.Enabled {
+		util.LogInfo("SSL certificate creation is disabled, skipping", "ssl")
+		return nil, nil
+	}
+
+	// Skip if domain is not set
+	if n.Config.Domain == "" {
+		util.LogInfo("Domain is not set, skipping SSL certificate creation", "ssl")
+		return nil, nil
+	}
+
+	util.LogInfo(fmt.Sprintf("Creating managed SSL certificate for domain: %s", n.Config.Domain), "ssl")
+
+	// Determine certificate name (use override if provided, otherwise use domain)
+	certName := n.Config.Domain
+	if n.Config.SSLCertificate.Name != "" {
+		certName = n.Config.SSLCertificate.Name
+	}
+
+	// Determine domain for certificate (use override if provided, otherwise use domain from config)
+	certDomain := n.Config.Domain
+	if n.Config.SSLCertificate.Domain != "" {
+		certDomain = n.Config.SSLCertificate.Domain
+	}
+
+	// Check if certificate already exists
+	existingCert, err := n.HetznerClient.GetCertificate(n.ctx, certName)
+	if err == nil && existingCert != nil {
+		util.LogInfo(fmt.Sprintf("SSL certificate already exists: %s", certName), "ssl")
+		return existingCert, nil
+	}
+
+	// Create managed certificate with root domain and wildcard
+	// This allows the certificate to be used for both example.com and *.example.com
+	domainNames := []string{
+		certDomain,
+		fmt.Sprintf("*.%s", certDomain),
+	}
+
+	cert, err := n.HetznerClient.CreateManagedCertificate(n.ctx, hcloud.CertificateCreateOpts{
+		Name:        certName,
+		Type:        hcloud.CertificateTypeManaged,
+		DomainNames: domainNames,
+		Labels: map[string]string{
+			"cluster": n.Config.ClusterName,
+			"managed": "hek3ster",
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create SSL certificate: %w", err)
+	}
+
+	util.LogSuccess(fmt.Sprintf("SSL certificate created: %s (covers: %s)", certName, strings.Join(domainNames, ", ")), "ssl")
+	util.LogInfo("Certificate validation will happen in the background (may take up to 5 minutes)", "ssl")
+	util.LogInfo("The certificate will be automatically validated via DNS records in your DNS zone", "ssl")
+
+	return cert, nil
 }

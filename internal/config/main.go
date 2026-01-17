@@ -35,6 +35,7 @@ type Main struct {
 	Addons                             Addons           `yaml:"addons,omitempty"`
 	LoadBalancer                       LoadBalancer     `yaml:"load_balancer,omitempty"`
 	DNSZone                            DNSZone          `yaml:"dns_zone,omitempty"`
+	SSLCertificate                     SSLCertificate   `yaml:"ssl_certificate,omitempty"`
 	IncludeInstanceTypeInInstanceName  bool             `yaml:"include_instance_type_in_instance_name,omitempty"`
 	ProtectAgainstDeletion             bool             `yaml:"protect_against_deletion,omitempty"`
 	CreateLoadBalancerForKubernetesAPI bool             `yaml:"create_load_balancer_for_the_kubernetes_api,omitempty"`
@@ -69,6 +70,7 @@ func (c *Main) SetDefaults() {
 	c.Addons.SetDefaults()
 	c.LoadBalancer.SetDefaults()
 	c.DNSZone.SetDefaults()
+	c.SSLCertificate.SetDefaults()
 
 	// Set defaults for master and worker node pools
 	c.MastersPool.SetDefaults()
