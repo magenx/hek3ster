@@ -623,3 +623,65 @@ func (c *Client) DeleteZoneRRSet(ctx context.Context, rrset *hcloud.ZoneRRSet) e
 
 	return nil
 }
+
+// CreateManagedCertificate creates a new managed SSL certificate
+// Managed certificates are automatically validated using DNS records
+func (c *Client) CreateManagedCertificate(ctx context.Context, opts hcloud.CertificateCreateOpts) (*hcloud.Certificate, error) {
+	result, _, err := c.hcloud.Certificate.CreateCertificate(ctx, opts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create certificate: %w", err)
+	}
+
+	// Note: We don't wait for certificate to be issued as it can take up to 5 minutes
+	// Hetzner will issue it in the background using DNS validation
+	return result.Certificate, nil
+}
+
+// GetCertificate returns a specific certificate by name
+func (c *Client) GetCertificate(ctx context.Context, name string) (*hcloud.Certificate, error) {
+	cert, _, err := c.hcloud.Certificate.GetByName(ctx, name)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch certificate %s: %w", name, err)
+	}
+	return cert, nil
+}
+
+// DeleteCertificate deletes a certificate
+func (c *Client) DeleteCertificate(ctx context.Context, cert *hcloud.Certificate) error {
+	_, err := c.hcloud.Certificate.Delete(ctx, cert)
+	if err != nil {
+		return fmt.Errorf("failed to delete certificate %s: %w", cert.Name, err)
+	}
+
+	// Wait for certificate to actually be deleted
+	ticker := time.NewTicker(2 * time.Second)
+	defer ticker.Stop()
+
+	timeout := time.NewTimer(2 * time.Minute)
+	defer timeout.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-timeout.C:
+			return fmt.Errorf("timeout waiting for certificate %s to be deleted", cert.Name)
+		case <-ticker.C:
+			// Check if certificate still exists
+			certificate, _, err := c.hcloud.Certificate.GetByID(ctx, cert.ID)
+			if err != nil {
+				// Only treat 'not found' errors as successful deletion
+				if hcloud.IsError(err, hcloud.ErrorCodeNotFound) {
+					return nil
+				}
+				// For other errors (e.g., transient network issues, API throttling),
+				// continue polling rather than failing the deletion immediately.
+				// The timeout will prevent infinite loops on persistent API issues.
+			}
+			if certificate == nil {
+				// Certificate is deleted
+				return nil
+			}
+		}
+	}
+}

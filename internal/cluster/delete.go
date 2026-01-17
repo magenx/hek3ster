@@ -154,7 +154,32 @@ func (d *Deleter) Run() error {
 		}
 	}
 
-	// Step 3: Delete DNS zone (if it was created)
+	// Step 3: Delete SSL certificate (if it was created)
+	// Must be deleted before load balancer that uses it
+	if d.Config.SSLCertificate.Enabled {
+		util.LogInfo("Finding and deleting SSL certificate", "ssl")
+		certName := d.Config.Domain
+		if d.Config.SSLCertificate.Name != "" {
+			certName = d.Config.SSLCertificate.Name
+		}
+		cert, err := d.HetznerClient.GetCertificate(d.ctx, certName)
+		if err == nil && cert != nil {
+			// Check if certificate is managed by this cluster
+			if cert.Labels["cluster"] == d.Config.ClusterName && cert.Labels["managed"] == "hek3ster" {
+				if err := d.HetznerClient.DeleteCertificate(d.ctx, cert); err != nil {
+					errMsg := fmt.Sprintf("Failed to delete SSL certificate: %v", err)
+					util.LogError(errMsg, "ssl")
+					deletionErrors = append(deletionErrors, errMsg)
+				} else {
+					util.LogSuccess("SSL certificate deleted", "ssl")
+				}
+			} else {
+				util.LogInfo("SSL certificate exists but is not managed by this cluster, skipping deletion", "ssl")
+			}
+		}
+	}
+
+	// Step 4: Delete DNS zone (if it was created)
 	if d.Config.DNSZone.Enabled && d.Config.Domain != "" {
 		util.LogInfo("Finding and deleting DNS zone", "dns")
 		zoneName := d.Config.Domain
@@ -178,7 +203,7 @@ func (d *Deleter) Run() error {
 		}
 	}
 
-	// Step 4: Delete network (after servers and load balancers that might be using it)
+	// Step 5: Delete network (after servers and load balancers that might be using it)
 	if d.Config.Networking.PrivateNetwork.Enabled {
 		util.LogInfo("Finding and deleting network", "network")
 		// Use cluster name as network name (matching creation logic)
@@ -195,7 +220,7 @@ func (d *Deleter) Run() error {
 		}
 	}
 
-	// Step 5: Delete firewalls (after all other resources, before SSH key)
+	// Step 6: Delete firewalls (after all other resources, before SSH key)
 	// Skip if local firewall is enabled
 	if !d.Config.Networking.PrivateNetwork.Enabled && d.Config.Networking.PublicNetwork.UseLocalFirewall {
 		util.LogInfo("Local firewall was used, skipping Hetzner cloud firewall deletion", "firewall")
@@ -214,7 +239,7 @@ func (d *Deleter) Run() error {
 		}
 	}
 
-	// Step 6: Delete SSH key (last, no dependencies)
+	// Step 7: Delete SSH key (last, no dependencies)
 	util.LogInfo("Finding and deleting SSH key", "ssh key")
 	keyName := fmt.Sprintf("%s-ssh-key", d.Config.ClusterName)
 	sshKey, err := d.HetznerClient.GetSSHKey(d.ctx, keyName)

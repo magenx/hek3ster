@@ -36,6 +36,7 @@ func (v *Validator) Validate() error {
 	v.validateDatastore()
 	v.validateLoadBalancer()
 	v.validateDNSZone()
+	v.validateSSLCertificate()
 	v.validateExternalTools()
 
 	if len(v.errors) > 0 {
@@ -490,6 +491,46 @@ func (v *Validator) validateDNSZone() {
 	if v.config.DNSZone.TTL > 86400 {
 		v.warnings = append(v.warnings,
 			"dns_zone.ttl is very high (>24 hours), consider using a lower value for faster DNS propagation")
+	}
+}
+
+// validateSSLCertificate validates SSL certificate configuration
+func (v *Validator) validateSSLCertificate() {
+	if !v.config.SSLCertificate.Enabled {
+		// SSL certificate is disabled, no validation needed
+		return
+	}
+
+	// If SSL certificate is enabled, DNS zone must be enabled for managed certificates
+	if !v.config.DNSZone.Enabled {
+		v.errors = append(v.errors,
+			"dns_zone.enabled must be true when ssl_certificate.enabled is true (required for DNS validation)")
+	}
+
+	// If SSL certificate is enabled, domain must be set
+	if v.config.Domain == "" {
+		v.errors = append(v.errors,
+			"domain is required when ssl_certificate.enabled is true")
+	}
+
+	// If SSL certificate is enabled, global load balancer must be enabled
+	if !v.config.LoadBalancer.Enabled {
+		v.errors = append(v.errors,
+			"load_balancer.enabled must be true when ssl_certificate.enabled is true")
+	}
+
+	// Check if load balancer has HTTPS service
+	hasHTTPSService := false
+	for _, svc := range v.config.LoadBalancer.Services {
+		if strings.ToLower(svc.Protocol) == "https" {
+			hasHTTPSService = true
+			break
+		}
+	}
+
+	if !hasHTTPSService {
+		v.warnings = append(v.warnings,
+			"ssl_certificate is enabled but no HTTPS service found in load_balancer.services. Certificate will be created but not used.")
 	}
 }
 

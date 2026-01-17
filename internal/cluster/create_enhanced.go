@@ -279,24 +279,36 @@ func (c *CreatorEnhanced) Run() error {
 
 	// Step 10: Create global load balancer (if enabled)
 	if c.Config.LoadBalancer.Enabled {
-		util.LogInfo("Creating global load balancer for application traffic", "load balancer")
 		networkMgr := NewNetworkResourceManager(c.Config, c.HetznerClient)
 
 		// Use the first master's location as default for load balancer
 		location := c.Config.MastersPool.Locations[0]
 
-		_, err := networkMgr.CreateGlobalLoadBalancer(network, location)
-		if err != nil {
-			return fmt.Errorf("failed to create global load balancer: %w", err)
-		}
-
-		// Step 10a: Create DNS zone (if enabled)
+		// Step 10a: Create DNS zone (if enabled) - must be created before SSL certificate
 		if c.Config.DNSZone.Enabled && c.Config.Domain != "" {
 			util.LogInfo("Creating DNS zone for domain", "dns")
 			_, err := networkMgr.CreateDNSZone()
 			if err != nil {
 				return fmt.Errorf("failed to create DNS zone: %w", err)
 			}
+		}
+
+		// Step 10b: Create SSL certificate (if enabled) - must be created before load balancer
+		var certificate *hcloud.Certificate
+		if c.Config.SSLCertificate.Enabled {
+			util.LogInfo("Creating SSL certificate", "ssl")
+			cert, err := networkMgr.CreateSSLCertificate()
+			if err != nil {
+				return fmt.Errorf("failed to create SSL certificate: %w", err)
+			}
+			certificate = cert
+		}
+
+		// Step 10c: Create global load balancer with certificate attached
+		util.LogInfo("Creating global load balancer for application traffic", "load balancer")
+		_, err := networkMgr.CreateGlobalLoadBalancer(network, location, certificate)
+		if err != nil {
+			return fmt.Errorf("failed to create global load balancer: %w", err)
 		}
 	}
 
