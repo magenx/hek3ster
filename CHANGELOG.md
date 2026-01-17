@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0-rc.2](https://github.com/magenx/hek3ster/compare/v1.1.0-rc.1...v1.1.0-rc.2) (2026-01-17)
+
+
+### 🚦 Maintenance
+
+* **test:** Update load balancer test cases for HTTP and HTTPS ([#165](https://github.com/magenx/hek3ster/issues/165)) ([6cfe79b](https://github.com/magenx/hek3ster/commit/6cfe79b5848fbb4e798d7d0400ab34bc8f36b279))
+
 ## [1.1.0-rc.1](https://github.com/magenx/hek3ster/compare/v1.1.0-rc...v1.1.0-rc.1) (2026-01-17)
 
 
