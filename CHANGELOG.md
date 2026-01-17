@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.0-rc](https://github.com/magenx/hek3ster/compare/v1.0.2...v1.1.0-rc) (2026-01-17)
+
+
+### 🚀 Features
+
+* **dns:** Add Hetzner DNS zone creation for domain management ([#157](https://github.com/magenx/hek3ster/issues/157)) ([df0d562](https://github.com/magenx/hek3ster/commit/df0d562af78e2e1500a52247ef09a86a4291d720))
+* **ssl certificate:** Add managed SSL certificate support with DNS validation ([#159](https://github.com/magenx/hek3ster/issues/159)) ([3411f21](https://github.com/magenx/hek3ster/commit/3411f2171d65dfdd25c703ce5a29c4893eaf6cb3))
+
+
+### 🚦 Maintenance
+
+* Simplify output message for tool checks ([#154](https://github.com/magenx/hek3ster/issues/154)) ([78f41a8](https://github.com/magenx/hek3ster/commit/78f41a8cde2d985fda25ad626522e2a4ca92d1e9))
+
 ## [1.0.2](https://github.com/magenx/hek3ster/compare/v1.0.1...v1.0.2) (2026-01-16)
 
 
