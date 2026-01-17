@@ -106,28 +106,6 @@ func TestValidateLoadBalancer(t *testing.T) {
 			errorContains: "invalid protocol 'udp'",
 		},
 		{
-			name: "HTTPS protocol not supported (requires certificates)",
-			config: &Main{
-				ClusterName: "test-cluster",
-				LoadBalancer: LoadBalancer{
-					Enabled: true,
-					Type:    "lb11",
-					Algorithm: LoadBalancerAlgorithm{
-						Type: "round_robin",
-					},
-					Services: []LoadBalancerService{
-						{
-							Protocol:        "https",
-							ListenPort:      443,
-							DestinationPort: 80,
-						},
-					},
-				},
-			},
-			expectError:   true,
-			errorContains: "requires TLS certificate configuration",
-		},
-		{
 			name: "Valid HTTP protocol",
 			config: &Main{
 				ClusterName: "test-cluster",
@@ -141,6 +119,27 @@ func TestValidateLoadBalancer(t *testing.T) {
 						{
 							Protocol:        "http",
 							ListenPort:      80,
+							DestinationPort: 80,
+						},
+					},
+				},
+			},
+			expectError: false,
+		},
+		{
+			name: "Valid HTTPS protocol",
+			config: &Main{
+				ClusterName: "test-cluster",
+				LoadBalancer: LoadBalancer{
+					Enabled: true,
+					Type:    "lb11",
+					Algorithm: LoadBalancerAlgorithm{
+						Type: "round_robin",
+					},
+					Services: []LoadBalancerService{
+						{
+							Protocol:        "https",
+							ListenPort:      443,
 							DestinationPort: 80,
 						},
 					},
