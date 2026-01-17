@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/magenx/hek3ster/internal/config"
@@ -107,17 +108,30 @@ func (d *Deleter) Run() error {
 			fmt.Printf("  - %s\n", server.Name)
 		}
 
-		// Delete servers with individual logging
+		// Delete servers in parallel for improved performance
+		var wg sync.WaitGroup
+		var mu sync.Mutex
+
 		for _, server := range allServers {
-			util.LogInfo(fmt.Sprintf("Deleting server: %s", server.Name), "servers")
-			if err := d.HetznerClient.DeleteServer(d.ctx, server); err != nil {
-				errMsg := fmt.Sprintf("Failed to delete server %s: %v", server.Name, err)
-				util.LogError(errMsg, "servers")
-				deletionErrors = append(deletionErrors, errMsg)
-			} else {
-				util.LogSuccess(fmt.Sprintf("Deleted server: %s", server.Name), "servers")
-			}
+			wg.Add(1)
+			go func(srv *hcloud.Server) {
+				defer wg.Done()
+
+				util.LogInfo(fmt.Sprintf("Deleting server: %s", srv.Name), "servers")
+				if err := d.HetznerClient.DeleteServer(d.ctx, srv); err != nil {
+					errMsg := fmt.Sprintf("Failed to delete server %s: %v", srv.Name, err)
+					util.LogError(errMsg, "servers")
+					mu.Lock()
+					deletionErrors = append(deletionErrors, errMsg)
+					mu.Unlock()
+				} else {
+					util.LogSuccess(fmt.Sprintf("Deleted server: %s", srv.Name), "servers")
+				}
+			}(server)
 		}
+
+		// Wait for all server deletions to complete
+		wg.Wait()
 	}
 
 	util.LogSuccess(fmt.Sprintf("Completed deletion of %d server(s)", len(allServers)), "servers")
