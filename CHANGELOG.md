@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0-rc.1](https://github.com/magenx/hek3ster/compare/v1.1.0-rc...v1.1.0-rc.1) (2026-01-17)
+
+
+### 🐛 Bug Fixes
+
+* **validator:** Support HTTPS protocol in load balancer validation ([#163](https://github.com/magenx/hek3ster/issues/163)) ([045a0b3](https://github.com/magenx/hek3ster/commit/045a0b3e8e780f07bd8fd09128ff81943a576ebd))
+
 ## [1.1.0-rc](https://github.com/magenx/hek3ster/compare/v1.0.2...v1.1.0-rc) (2026-01-17)
 
 
