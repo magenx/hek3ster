@@ -62,7 +62,7 @@ networking:
       
 # Public network disabled
   public_network:
-    use_local_firewall: false
+    use_local_firewall: true
     ipv4:
       enabled: false
     ipv6:
@@ -80,142 +80,26 @@ networking:
 
   cni:
     enabled: true
-    mode: flannel
-    encryption: true
-    flannel:
-      encryption: true
-      disable_kube_proxy: false
-      
-# Global Load Balancer Configuration
-# This load balancer will serve public traffic for your applications
-load_balancer:
-  # Optional: Custom name for the load balancer
-  # If not specified, defaults to "{cluster_name}-global-lb"
-  # name: *cluster_name
-  enabled: true
-  target_pools: ["varnish"]
-  use_private_ip: true
-  attach_to_network: true
-  type: "lb11"
-  location: *location
-  algorithm:
-    type: "round_robin"
-  services:
-    - protocol: "http"
-      listen_port: 80
-      destination_port: 80
-      proxyprotocol: false
-      health_check:
-        protocol: "http"
-        port: 80
-        interval: 15
-        timeout: 10
-        retries: 3
-        http:
-          domain: *domain
-          path: "/health_check.php"
-          status_codes: ["2??", "3??"]
-          tls: false
+    mode: cilium
+    cilium:
+      enabled: true                               
+      version: v1.18.6 
+      encryption_type: wireguard
 
-masters_pool:
-  instance_type: cpx22
-  instance_count: 2
-  locations:
-    - *location
-
-worker_node_pools:
-- name: varnish
-  instance_type: cpx22
-  instance_count: 1
-  location: *location
- 
-- name: nginx
-  instance_type: cpx22
-  instance_count: 1
-  location: *location
-
-- name: php
-  instance_type: cpx22
-  location: *location
-  autoscaling:
+  # DNS Zone Management (Required for SSL certificate)
+  dns_zone:
     enabled: true
-    min_instances: 1
-    max_instances: 3
+    name: *domain
+    ttl: 3600
 
-- name: valkey
-  instance_type: cpx22
-  instance_count: 1
-  location: *location
-
-- name: rabbitmq
-  instance_type: cpx22
-  instance_count: 1
-  location: *location
-  
-- name: opensearch
-  instance_type: cpx22
-  instance_count: 1
-  location: *location
-
-- name: mariadb
-  instance_type: cpx22
-  instance_count: 1
-  location: *location
-
-addons:
-  metrics_server:
+  # SSL Certificate (Requires DNS zone)
+  ssl_certificate:
     enabled: true
-  csi_driver:
-    enabled: true
-    manifest_url: "https://raw.githubusercontent.com/hetznercloud/csi-driver/
-    v2.18.3/deploy/kubernetes/hcloud-csi.yml"
-  cluster_autoscaler:
-    enabled: true
-    manifest_url: "https://raw.githubusercontent.com/kubernetes/autoscaler/master/
-    cluster-autoscaler/cloudprovider/hetzner/examples/cluster-autoscaler-run-on-master.yaml"
-    container_image_tag: "v1.34.2"
-    scan_interval: "10s"                        
-    scale_down_delay_after_add: "10m"
-    scale_down_delay_after_delete: "10s"
-    scale_down_delay_after_failure: "3m"
-    max_node_provision_time: "5m"
-  cloud_controller_manager:
-    enabled: true
-    manifest_url: "https://github.com/hetznercloud/
-    hcloud-cloud-controller-manager/releases/download/v1.28.0/ccm-networks.yaml"
-  system_upgrade_controller:
-    enabled: true
-    deployment_manifest_url: "https://github.com/rancher/
-    system-upgrade-controller/releases/download/v0.18.0/system-upgrade-controller.yaml"
-    crd_manifest_url: "https://github.com/rancher/
-    system-upgrade-controller/releases/download/v0.18.0/crd.yaml"
-  embedded_registry_mirror:
-    enabled: true 
-
-additional_packages:
-  - ufw
-
-additional_pre_k3s_commands:
-  - apt autoremove -y hc-utils
-  - apt purge -y hc-utils
-  - echo "auto enp7s0" > /etc/network/interfaces
-  - echo "iface enp7s0 inet dhcp" >> /etc/network/interfaces
-  - echo "    post-up ip route add default via 10.0.0.1"  >> /etc/network/interfaces
-  - echo "[Resolve]" > /etc/systemd/resolved.conf
-  - echo "DNS=185.12.64.2 185.12.64.1" >> /etc/systemd/resolved.conf
-  - ifdown enp7s0 2>/dev/null || true
-  - ifup enp7s0 2>/dev/null || true
-  - sleep 2
-  - apt update
-  - apt install -y resolvconf syslog-ng
-  - systemctl enable --now resolvconf
-  - echo "nameserver 185.12.64.2" >> /etc/resolvconf/resolv.conf.d/head
-  - echo "nameserver 185.12.64.1" >> /etc/resolvconf/resolv.conf.d/head
-  - resolvconf --enable-updates
-  - resolvconf -u
-
-additional_post_k3s_commands:
-  - apt autoremove -y`,
+    name: *domain
+    domain: *domain
+...
+...
+`,
   },
   {
     number: 3,
