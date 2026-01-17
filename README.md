@@ -124,13 +124,30 @@ The Hek3ster project is a Kubernetes cluster management tool written in Go, prov
 
 **1. Load Balancer** ✅
 - Kubernetes API load balancer creation
+- Global load balancer for application traffic
+- HTTPS/TLS support with managed SSL certificates
 - Automatic master node targeting
 - TCP health checks (15s interval, 10s timeout, 3 retries)
 - Public IPv4/IPv6 support
 - Automatic DNS configuration
 - Cluster-specific labeling
 
-**2. Firewall** ✅
+**2. SSL Certificates** ✅
+- Managed SSL certificate creation via Hetzner
+- Automatic DNS validation using Hetzner DNS zones
+- Root domain and wildcard subdomain coverage (example.com and *.example.com)
+- Automatic attachment to HTTPS load balancer services
+- Background certificate issuance (up to 5 minutes)
+- Certificate lifecycle management (create/delete)
+
+**3. DNS Zone Management** ✅
+- Automated DNS zone creation in Hetzner DNS
+- Configurable TTL values
+- Nameserver information display
+- Integration with SSL certificate validation
+- Cluster-specific zone labeling
+
+**4. Firewall** ✅
 - SSH access control from configured networks
 - API access control from configured networks
 - Full internal network communication (TCP/UDP/ICMP)
@@ -248,6 +265,7 @@ hetzner_token: <your_hetzner_cloud_token_here>
 cluster_name: mykubic
 kubeconfig_path: ./kubeconfig
 k3s_version: v1.32.0+k3s1
+domain: example.com   # Optional: Required for DNS zone and SSL certificate
 
 # Networking Configuration
 networking:
@@ -288,6 +306,34 @@ worker_node_pools:
       - "role=worker"
       - "environment=developer"
     taints: []
+
+# Global Load Balancer (Optional)
+load_balancer:
+  enabled: true
+  type: lb11               # Smallest load balancer type
+  location: fsn1
+  services:
+    - protocol: https      # HTTPS service (requires SSL certificate)
+      listen_port: 443
+      destination_port: 80
+    - protocol: tcp        # HTTP service
+      listen_port: 80
+      destination_port: 80
+
+# DNS Zone Management (Optional, required for SSL certificate)
+dns_zone:
+  enabled: true
+  name: example.com        # Will use domain if not specified
+  ttl: 3600                # DNS TTL in seconds
+
+# SSL Certificate (Optional, requires DNS zone)
+ssl_certificate:
+  enabled: true
+  name: example.com        # Certificate name (will use domain if not specified)
+  domain: example.com      # Domain for certificate (will use domain if not specified)
+  # Creates certificate for example.com and *.example.com
+  # Certificate is automatically validated via DNS and attached to HTTPS services
+
 ```
 
 **Create the Cluster:**
