@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0-rc.3](https://github.com/magenx/hek3ster/compare/v1.1.0-rc.2...v1.1.0-rc.3) (2026-01-17)
+
+
+### 🛠️ Refactoring
+
+* **delete:** parallelize server deletion for faster cluster cleanup ([#168](https://github.com/magenx/hek3ster/issues/168)) ([b0f8cd1](https://github.com/magenx/hek3ster/commit/b0f8cd1328b27cc450c505b4421eb1340705fa8b))
+
 ## [1.1.0-rc.2](https://github.com/magenx/hek3ster/compare/v1.1.0-rc.1...v1.1.0-rc.2) (2026-01-17)
 
 
