@@ -348,9 +348,8 @@ func (v *Validator) validateLoadBalancer() {
 	}
 
 	for i, svc := range v.config.LoadBalancer.Services {
-		// Validate protocol - tcp and http are supported
-		// https protocol requires TLS certificate configuration which is not yet implemented
-		validProtocols := []string{"tcp", "http"}
+		// Validate protocol - tcp http https are supported
+		validProtocols := []string{"tcp", "http", "https"}
 		isValidProtocol := false
 		for _, validProto := range validProtocols {
 			if svc.Protocol == validProto {
@@ -358,18 +357,10 @@ func (v *Validator) validateLoadBalancer() {
 				break
 			}
 		}
-		if !isValidProtocol {
-			errorMsg := fmt.Sprintf("load_balancer: service %d has invalid protocol '%s'", i+1, svc.Protocol)
-			// Provide helpful message if user tried to use https
-			if svc.Protocol == "https" {
-				errorMsg += fmt.Sprintf(". Protocol '%s' requires TLS certificate configuration (not yet supported). ", svc.Protocol)
-				errorMsg += "Use protocol 'tcp' for pass-through traffic or 'http' for HTTP load balancing. "
-				errorMsg += "For HTTPS traffic, use protocol 'tcp' with listen_port 443 and let your ingress controller handle TLS termination"
-			} else {
-				errorMsg += fmt.Sprintf(", must be one of: %s", strings.Join(validProtocols, ", "))
-			}
-			v.errors = append(v.errors, errorMsg)
-		}
+        if !isValidProtocol {
+			v.errors = append(v.errors, fmt.Sprintf("load_balancer: service %d has invalid protocol '%s', must be one of: %s",
+				i+1, svc.Protocol, strings.Join(validProtocols, ", ")))
+        }
 
 		// Validate ports
 		if svc.ListenPort < 1 || svc.ListenPort > 65535 {
