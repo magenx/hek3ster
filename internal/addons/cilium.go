@@ -165,23 +165,13 @@ func (c *CiliumInstaller) installCiliumCLI() error {
 	// Set kubeconfig explicitly with expanded path
 	args = append(args, "--kubeconfig", kubeconfigPath)
 
-	// Execute cilium install command
+	// Execute cilium install command with prefix to capture all output
 	shell := util.NewShell()
-	result := shell.Run("cilium", args...)
-
-	if result.Error != nil {
-		errMsg := fmt.Sprintf("cilium install failed: %v", result.Error)
-		if result.Stderr != "" {
-			errMsg += fmt.Sprintf("\nStderr: %s", result.Stderr)
-		}
-		return fmt.Errorf("%s", errMsg)
+	if err := shell.RunWithPrefix("cilium", "cilium", args...); err != nil {
+		return fmt.Errorf("cilium install failed: %w", err)
 	}
 
 	util.LogInfo("Cilium installation command completed", "cilium")
-	if result.Stdout != "" {
-		util.LogInfo(result.Stdout, "cilium")
-	}
-
 	return nil
 }
 
@@ -195,16 +185,10 @@ func (c *CiliumInstaller) waitForCiliumReady() error {
 		return fmt.Errorf("failed to expand kubeconfig path: %w", err)
 	}
 
-	// Use cilium status --wait to wait for Cilium to be ready
+	// Use cilium status --wait to wait for Cilium to be ready with prefix for output
 	shell := util.NewShell()
-	result := shell.Run("cilium", "status", "--wait", "--kubeconfig", kubeconfigPath)
-
-	if result.Error != nil {
-		errMsg := fmt.Sprintf("Cilium status check failed: %v", result.Error)
-		if result.Stderr != "" {
-			errMsg += fmt.Sprintf("\nStderr: %s", result.Stderr)
-		}
-		return fmt.Errorf("%s", errMsg)
+	if err := shell.RunWithPrefix("cilium", "cilium", "status", "--wait", "--kubeconfig", kubeconfigPath); err != nil {
+		return fmt.Errorf("Cilium status check failed: %w", err)
 	}
 
 	util.LogSuccess("Cilium is ready", "cilium")
