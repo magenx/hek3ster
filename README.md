@@ -263,7 +263,7 @@ hetzner_token: <your_hetzner_cloud_token_here>
 
 # Cluster Configuration
 cluster_name: mykubic
-kubeconfig_path: ./kubeconfig
+kubeconfig_path: ~/.kube/config
 k3s_version: v1.32.0+k3s1
 domain: example.com   # Optional: Required for DNS zone and SSL certificate
 
@@ -345,10 +345,8 @@ ssl_certificate:
 ### Verify and Use the Cluster
 
 ```bash
-# Set kubeconfig
-export KUBECONFIG=./kubeconfig
-
-# Check cluster nodes
+# Check cluster
+kubectl get all -A
 kubectl get nodes
 ```
 
