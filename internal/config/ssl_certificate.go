@@ -9,6 +9,6 @@ type SSLCertificate struct {
 
 // SetDefaults sets default values for SSL certificate configuration
 func (s *SSLCertificate) SetDefaults() {
-	// No specific defaults needed - all fields are optional
-	// and will be derived from other config values if not set
+	// No defaults are set here - name and domain are derived from the main
+	// configuration's domain field when creating the certificate if not explicitly set
 }

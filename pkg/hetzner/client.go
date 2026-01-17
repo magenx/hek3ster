@@ -674,7 +674,9 @@ func (c *Client) DeleteCertificate(ctx context.Context, cert *hcloud.Certificate
 				if hcloud.IsError(err, hcloud.ErrorCodeNotFound) {
 					return nil
 				}
-				// For other errors, continue polling
+				// For other errors (e.g., transient network issues, API throttling),
+				// continue polling rather than failing the deletion immediately.
+				// The timeout will prevent infinite loops on persistent API issues.
 			}
 			if certificate == nil {
 				// Certificate is deleted

@@ -286,17 +286,13 @@ func (n *NetworkResourceManager) CreateGlobalLoadBalancer(network *hcloud.Networ
 			Proxyprotocol:   hcloud.Ptr(svc.ProxyProtocol),
 		}
 
-		// Add HTTP configuration for HTTPS services
-		if strings.ToLower(svc.Protocol) == "https" {
-			httpConfig := &hcloud.LoadBalancerCreateOptsServiceHTTP{}
-
-			// Attach certificate if provided
-			if certificate != nil {
-				httpConfig.Certificates = []*hcloud.Certificate{certificate}
-				util.LogInfo(fmt.Sprintf("Attaching SSL certificate to HTTPS service on port %d", svc.ListenPort), "load balancer")
+		// Add HTTP configuration for HTTPS services with certificate
+		if strings.ToLower(svc.Protocol) == "https" && certificate != nil {
+			httpConfig := &hcloud.LoadBalancerCreateOptsServiceHTTP{
+				Certificates: []*hcloud.Certificate{certificate},
 			}
-
 			service.HTTP = httpConfig
+			util.LogInfo(fmt.Sprintf("Attaching SSL certificate to HTTPS service on port %d", svc.ListenPort), "load balancer")
 		}
 
 		// Add health check if configured
